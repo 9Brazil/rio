@@ -540,6 +540,6 @@ Cursor *corners[9] = {
 void
 iconinit(void)
 {
-	background  = alloccolor(DGray47,  RGB24);
+	background  = alloccolor(DGrey47,  RGB24);
 	red         = alloccolor(DPurered, RGB24);
 }

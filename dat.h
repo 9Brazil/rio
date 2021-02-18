@@ -65,11 +65,12 @@ enum
 
 enum
 {
-	DGray40         = 0x666666FF,
-	DGray47         = 0x777777FF,
-	DGray60         = 0x999999FF,
-	DGray80         = 0xCCCCCCFF,
-	DPurered        = 0xDD0000FF,
+	DGrey40		= 0x666666FF,
+	DGrey47		= 0x777777FF,
+	DGrey60		= 0x999999FF,
+	DGrey80		= 0xCCCCCCFF,
+	DGrey200	= 0xEEEEEEFF,
+	DPurered	= 0xDD0000FF,
 };
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
@@ -78,9 +79,9 @@ enum
 
 #define BIG		3		/* factor by which window dimension can exceed screen */
 
-#define	QID(w,q)	((w<<8)|(q))
-#define	WIN(q)		((((ulong)(q).path)>>8) & 0xFFFFFF)
-#define	FILE(q)		(((ulong)(q).path) & 0xFF)
+#define QID(w,q)	((w<<8)|(q))
+#define WIN(q)		((((ulong)(q).path)>>8) & 0xFFFFFF)
+#define FILE(q)		(((ulong)(q).path) & 0xFF)
 
 typedef enum Mesgtype			/* control messages */
 {

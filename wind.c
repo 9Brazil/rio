@@ -43,11 +43,11 @@ Window
 
 	if(cols[0] == nil){
 		/* greys are multiples of 0x11111100+0xFF, 14* being palest */
-		grey = alloccolor(0xEEEEEEFF,RGB24);
-		darkgrey = alloccolor(DGray40,RGB24);
+		grey = alloccolor(DGrey200,RGB24);
+		darkgrey = alloccolor(DGrey40,RGB24);
 		cols[BACK] = display->white;
-		cols[HIGH] = alloccolor(DGray80,RGB24);
-		cols[BORD] = alloccolor(DGray60,RGB24);
+		cols[HIGH] = alloccolor(DGrey80,RGB24);
+		cols[BORD] = alloccolor(DGrey60,RGB24);
 		cols[TEXT] = display->black;
 		cols[HTEXT] = display->black;
 		titlecol = alloccolor(DGreygreen,RGB24);
