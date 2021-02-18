@@ -8,10 +8,11 @@
 #include <frame.h>
 #include <fcall.h>
 #include "dat.h"
+#include "err.h"
 #include "fns.h"
 
-static Channel*	ctimer;	/* chan(Timer*)[100] */
-static Timer *timer;
+static Channel	*ctimer; /* chan(Timer *)[100] */
+static Timer	*timer;
 
 static
 uint
@@ -35,7 +36,7 @@ timercancel(Timer *t)
 
 static
 void
-timerproc(void*)
+timerproc(void *)
 {
 	int i, nt, na, dt, del;
 	Timer **t, *x;
@@ -57,17 +58,17 @@ timerproc(void*)
 		for(i=0; i<nt; i++){
 			x = t[i];
 			x->dt -= dt;
-			del = 0;
+			del = FALSE;
 			if(x->cancel){
 				timerstop(x);
-				del = 1;
+				del = TRUE;
 			}else if(x->dt <= 0){
 				/*
 				 * avoid possible deadlock if client is
 				 * now sending on ctimer
 				 */
 				if(nbsendul(x->c, 0) > 0)
-					del = 1;
+					del = TRUE;
 			}
 			if(del){
 				memmove(&t[i], &t[i+1], (nt-i-1)*sizeof t[0]);
@@ -80,7 +81,7 @@ timerproc(void*)
 	gotit:
 			if(nt == na){
 				na += 10;
-				t = realloc(t, na*sizeof(Timer*));
+				t = realloc(t, na*sizeof(Timer *));
 				if(t == nil)
 					abort();
 			}
@@ -95,7 +96,7 @@ timerproc(void*)
 void
 timerinit(void)
 {
-	ctimer = chancreate(sizeof(Timer*), 100);
+	ctimer = chancreate(sizeof(Timer *), 100);
 	proccreate(timerproc, nil, STACK);
 }
 
@@ -104,13 +105,13 @@ timerinit(void)
  * called from the main proc.
  */
 
-Timer*
-timerstart(int dt)
+Timer
+*timerstart(int dt)
 {
 	Timer *t;
 
 	t = timer;
-	if(t)
+	if(t != nil)
 		timer = timer->next;
 	else{
 		t = emalloc(sizeof(Timer));

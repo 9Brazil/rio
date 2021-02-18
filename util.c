@@ -8,6 +8,7 @@
 #include <frame.h>
 #include <fcall.h>
 #include "dat.h"
+#include "err.h"
 #include "fns.h"
 
 void
@@ -24,22 +25,22 @@ cvttorunes(char *p, int n, Rune *r, int *nb, int *nr, int *nulls)
 	 * knows this.  If n is a firm limit, the caller should
 	 * set p[n] = 0.
 	 */
-	q = (uchar*)p;
+	q = (uchar *)p;
 	s = r;
 	for(j=0; j<n; j+=w){
 		if(*q < Runeself){
 			w = 1;
 			*s = *q++;
 		}else{
-			w = chartorune(s, (char*)q);
+			w = chartorune(s, (char *)q);
 			q += w;
 		}
 		if(*s)
 			s++;
 		else if(nulls)
-				*nulls = TRUE;
+			*nulls = TRUE;
 	}
-	*nb = (char*)q-p;
+	*nb = (char *)q-p;
 	*nr = s-r;
 }
 
@@ -52,35 +53,35 @@ error(char *s)
 	threadexitsall("error");
 }
 
-void*
-erealloc(void *p, uint n)
+void
+*erealloc(void *p, uint n)
 {
 	p = realloc(p, n);
 	if(p == nil)
-		error("realloc failed");
+		error(Erealloc);
 	return p;
 }
 
-void*
-emalloc(uint n)
+void
+*emalloc(uint n)
 {
 	void *p;
 
 	p = malloc(n);
 	if(p == nil)
-		error("malloc failed");
+		error(Emalloc);
 	memset(p, 0, n);
 	return p;
 }
 
-char*
-estrdup(char *s)
+char
+*estrdup(char *s)
 {
 	char *p;
 
 	p = malloc(strlen(s)+1);
 	if(p == nil)
-		error("strdup failed");
+		error(Estrdup);
 	strcpy(p, s);
 	return p;
 }
@@ -89,25 +90,25 @@ int
 isalnum(Rune c)
 {
 	/*
-	 * Hard to get absolutely right.  Use what we know about ASCII
+	 * Hard to get absolutely right. Use what we know about ASCII
 	 * and assume anything above the Latin control characters is
 	 * potentially an alphanumeric.
 	 */
 	if(c <= ' ')
 		return FALSE;
-	if(0x7F<=c && c<=0xA0)
+	if(c>=0x7F && c<=0xA0)
 		return FALSE;
 	if(utfrune("!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", c))
 		return FALSE;
 	return TRUE;
 }
 
-Rune*
-strrune(Rune *s, Rune c)
+Rune
+*strrune(Rune *s, Rune c)
 {
 	Rune c1;
 
-	if(c == 0) {
+	if(c == 0){
 		while(*s++)
 			;
 		return s-1;
@@ -135,8 +136,8 @@ max(int a, int b)
 	return b;
 }
 
-char*
-runetobyte(Rune *r, int n, int *ip)
+char
+*runetobyte(Rune *r, int n, int *ip)
 {
 	char *s;
 	int m;
@@ -146,4 +147,3 @@ runetobyte(Rune *r, int n, int *ip)
 	*ip = m;
 	return s;
 }
-

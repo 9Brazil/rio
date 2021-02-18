@@ -10,50 +10,51 @@
 #include <plumb.h>
 #include <complete.h>
 #include "dat.h"
+#include "err.h"
 #include "fns.h"
 
 #define MOVEIT if(0)
 
 enum
 {
-	HiWater	= 640000,	/* max size of history */
-	LoWater	= 400000,	/* min size of history after max'ed */
-	MinWater	= 20000,	/* room to leave available when reallocating */
+	HiWater = 640000,	/* max size of history */
+	LoWater = 400000,	/* min size of history after max'ed */
+	MinWater = 20000,	/* room to leave available when reallocating */
 };
 
-static	int		topped;
-static	int		id;
+static int topped;
+static int id;
 
-static	Image	*cols[NCOL];
-static	Image	*grey;
-static	Image	*darkgrey;
-static	Cursor	*lastcursor;
-static	Image	*titlecol;
-static	Image	*lighttitlecol;
-static	Image	*holdcol;
-static	Image	*lightholdcol;
-static	Image	*paleholdcol;
+static Image *cols[NCOL];
+static Image *grey;
+static Image *darkgrey;
+static Cursor *lastcursor;
+static Image *titlecol;
+static Image *lighttitlecol;
+static Image *holdcol;
+static Image *lightholdcol;
+static Image *paleholdcol;
 
-Window*
-wmk(Image *i, Mousectl *mc, Channel *ck, Channel *cctl, int scrolling)
+Window
+*wmk(Image *i, Mousectl *mc, Channel *ck, Channel *cctl, int scrolling)
 {
 	Window *w;
 	Rectangle r;
 
 	if(cols[0] == nil){
 		/* greys are multiples of 0x11111100+0xFF, 14* being palest */
-		grey = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0xEEEEEEFF);
-		darkgrey = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0x666666FF);
+		grey = alloccolor(0xEEEEEEFF,RGB24);
+		darkgrey = alloccolor(DGray40,RGB24);
 		cols[BACK] = display->white;
-		cols[HIGH] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0xCCCCCCFF);
-		cols[BORD] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0x999999FF);
+		cols[HIGH] = alloccolor(DGray80,RGB24);
+		cols[BORD] = alloccolor(DGray60,RGB24);
 		cols[TEXT] = display->black;
 		cols[HTEXT] = display->black;
-		titlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DGreygreen);
-		lighttitlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DPalegreygreen);
-		holdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DMedblue);
-		lightholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DGreyblue);
-		paleholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DPalegreyblue);
+		titlecol = alloccolor(DGreygreen,RGB24);
+		lighttitlecol = alloccolor(DPalegreygreen,RGB24);
+		holdcol = alloccolor(DMedblue,RGB24);
+		lightholdcol = alloccolor(DGreyblue,RGB24);
+		paleholdcol = alloccolor(DPalegreyblue,RGB24);
 	}
 	w = emalloc(sizeof(Window));
 	w->screenr = i->r;
@@ -64,9 +65,9 @@ wmk(Image *i, Mousectl *mc, Channel *ck, Channel *cctl, int scrolling)
 	w->cctl = cctl;
 	w->cursorp = nil;
 	w->conswrite = chancreate(sizeof(Conswritemesg), 0);
-	w->consread =  chancreate(sizeof(Consreadmesg), 0);
-	w->mouseread =  chancreate(sizeof(Mousereadmesg), 0);
-	w->wctlread =  chancreate(sizeof(Consreadmesg), 0);
+	w->consread = chancreate(sizeof(Consreadmesg), 0);
+	w->mouseread = chancreate(sizeof(Mousereadmesg), 0);
+	w->wctlread = chancreate(sizeof(Consreadmesg), 0);
 	w->scrollr = r;
 	w->scrollr.max.x = r.min.x+Scrollwid;
 	w->lastsr = ZR;
@@ -92,13 +93,13 @@ wsetname(Window *w)
 {
 	int i, n;
 	char err[ERRMAX];
-	
+
 	n = sprint(w->name, "window.%d.%d", w->id, w->namecount++);
 	for(i='A'; i<='Z'; i++){
-		if(nameimage(w->i, w->name, 1) > 0)
+		if(nameimage(w->i, w->name, TRUE) > 0)
 			return;
 		errstr(err, sizeof err);
-		if(strcmp(err, "image name in use") != 0)
+		if(strcmp(err, Eimgname) != 0)
 			break;
 		w->name[n] = i;
 		w->name[n+1] = 0;
@@ -154,12 +155,12 @@ wrefresh(Window *w, Rectangle)
 	if(w->mouseopen)
 		return;
 	draw(w->i, insetrect(w->i->r, Borderwidth), w->cols[BACK], nil, w->i->r.min);
-	w->ticked = 0;
+	w->ticked = FALSE;
 	if(w->p0 > 0)
-		frdrawsel(w, frptofchar(w, 0), 0, w->p0, 0);
+		frdrawsel(w, frptofchar(w, 0), 0, w->p0, FALSE);
 	if(w->p1 < w->nchars)
-		frdrawsel(w, frptofchar(w, w->p1), w->p1, w->nchars, 0);
-	frdrawsel(w, frptofchar(w, w->p0), w->p0, w->p1, 1);
+		frdrawsel(w, frptofchar(w, w->p1), w->p1, w->nchars, FALSE);
+	frdrawsel(w, frptofchar(w, w->p0), w->p0, w->p1, TRUE);
 	w->lastsr = ZR;
 	wscrdraw(w);
 }
@@ -171,13 +172,13 @@ wclose(Window *w)
 
 	i = decref(w);
 	if(i > 0)
-		return 0;
+		return FALSE;
 	if(i < 0)
-		error("negative ref count");
+		error(Enegative);
 	if(!w->deleted)
 		wclosewin(w);
 	wsendctlmesg(w, Exited, ZR, nil);
-	return 1;
+	return TRUE;
 }
 
 
@@ -210,7 +211,7 @@ winctl(void *arg)
 	crm.c2 = chancreate(sizeof(Stringpair), 0);
 	cwrm.c1 = chancreate(sizeof(Stringpair), 0);
 	cwrm.c2 = chancreate(sizeof(Stringpair), 0);
-	
+
 
 	alts[WKey].c = w->ck;
 	alts[WKey].v = &kbdr;
@@ -254,7 +255,7 @@ winctl(void *arg)
 		/* kind of expensive for each loop; worth precomputing? */
 		if(w->holding)
 			alts[WCread].op = CHANNOP;
-		else if(npart || (w->rawing && w->nraw>0))
+		else if(npart!=0 || (w->rawing && w->nraw>0))
 			alts[WCread].op = CHANSND;
 		else{
 			alts[WCread].op = CHANNOP;
@@ -275,11 +276,11 @@ winctl(void *arg)
 //				wkeyctl(w, r);
 			break;
 		case WMouse:
-			if(w->mouseopen) {
+			if(w->mouseopen){
 				w->mouse.counter++;
 
 				/* queue click events */
-				if(!w->mouse.qfull && lastb != w->mc.buttons) {	/* add to ring */
+				if(!w->mouse.qfull && lastb != w->mc.buttons){ /* add to ring */
 					mp = &w->mouse.queue[w->mouse.wi];
 					if(++w->mouse.wi == nelem(w->mouse.queue))
 						w->mouse.wi = 0;
@@ -297,7 +298,7 @@ winctl(void *arg)
 			/* if the queue has filled, we discard all the events it contained. */
 			/* the intent is to discard frantic clicking by the user during long latencies. */
 			w->mouse.qfull = FALSE;
-			if(w->mouse.wi != w->mouse.ri) {
+			if(w->mouse.wi != w->mouse.ri){
 				m = w->mouse.queue[w->mouse.ri];
 				if(++w->mouse.ri == nelem(w->mouse.queue))
 					w->mouse.ri = 0;
@@ -340,7 +341,7 @@ winctl(void *arg)
 						else
 							up++;
 					}
-					if(initial){
+					if(initial != 0){
 						if(initial > w->qh)
 							initial = w->qh;
 						qh = w->qh-initial;
@@ -366,7 +367,7 @@ winctl(void *arg)
 			nb = pair.ns;
 			i = npart;
 			npart = 0;
-			if(i)
+			if(i != 0)
 				memmove(t, part, i);
 			while(i<nb && (w->qh<w->nr || w->nraw>0)){
 				if(w->qh == w->nr){
@@ -395,7 +396,7 @@ winctl(void *arg)
 			send(crm.c2, &pair);
 			continue;
 		case WWread:
-			w->wctlready = 0;
+			w->wctlready = FALSE;
 			recv(cwrm.c1, &pair);
 			if(w->deleted || w->i==nil)
 				pair.ns = sprint(pair.s, "");
@@ -416,7 +417,7 @@ winctl(void *arg)
 			continue;
 		}
 		if(!w->deleted)
-			flushimage(display, 1);
+			flushimage(display, TRUE);
 	}
 }
 
@@ -470,7 +471,7 @@ showcandidates(Window *w, Completion *c)
 	char *s;
 
 	runefmtstrinit(&f);
-	if (c->nmatch == 0)
+	if(c->nmatch == 0)
 		s = "[no matches in ";
 	else
 		s = "[";
@@ -499,8 +500,8 @@ showcandidates(Window *w, Completion *c)
 	wsetselect(w, q0+nr, q0+nr);
 }
 
-Rune*
-namecomplete(Window *w)
+Rune
+*namecomplete(Window *w)
 {
 	int nstr, npath;
 	Rune *rp, *path, *str;
@@ -634,7 +635,7 @@ wkeyctl(Window *w, Rune r)
 		waddraw(w, &r, 1);
 		return;
 	}
-	if(r==0x1B || (w->holding && r==0x7F)){	/* toggle hold */
+	if(r==0x1B || (w->holding && r==0x7F)){ /* toggle hold */
 		if(w->holding)
 			--w->holding;
 		else
@@ -648,7 +649,7 @@ wkeyctl(Window *w, Rune r)
 		wcut(w);
 	}
 	switch(r){
-	case 0x7F:		/* send interrupt */
+	case 0x7F:	/* send interrupt */
 		w->qh = w->nr;
 		wshow(w, w->qh);
 		notefd = emalloc(sizeof(int));
@@ -656,7 +657,7 @@ wkeyctl(Window *w, Rune r)
 		proccreate(interruptproc, notefd, 4096);
 		return;
 	case 0x06:	/* ^F: file name completion */
-	case Kins:		/* Insert: file name completion */
+	case Kins:	/* Insert: file name completion */
 		rp = namecomplete(w);
 		if(rp == nil)
 			return;
@@ -713,7 +714,7 @@ wrepaint(Window *w)
 		frredraw(w);
 	if(w == input){
 		wborder(w, Selborder);
-		wsetcursor(w, 0);
+		wsetcursor(w, FALSE);
 	}else
 		wborder(w, Unselborder);
 }
@@ -738,7 +739,7 @@ wbswidth(Window *w, Rune c)
 		if(r == '\n'){		/* eat at most one more character */
 			if(q == w->q0)	/* eat the newline */
 				--q;
-			break; 
+			break;
 		}
 		if(c == 0x17){
 			eq = isalnum(r);
@@ -823,14 +824,14 @@ wplumb(Window *w)
 	}
 	if(p1-p0 > messagesize-1024){
 		plumbfree(m);
-		return;	/* too large for 9P */
+		return; /* too large for 9P */
 	}
 	m->data = runetobyte(w->r+p0, p1-p0, &m->ndata);
 	if(plumbsend(fd, m) < 0){
 		c = lastcursor;
-		riosetcursor(&query, 1);
+		riosetcursor(&query, TRUE);
 		sleep(300);
-		riosetcursor(c, 1);
+		riosetcursor(c, TRUE);
 	}
 	plumbfree(m);
 }
@@ -860,19 +861,19 @@ wmousectl(Window *w)
 		return;
 	}
 
-	incref(w);		/* hold up window while we track */
+	incref(w);	/* hold up window while we track */
 	if(w->deleted)
 		goto Return;
 	if(ptinrect(w->mc.xy, w->scrollr)){
-		if(but)
+		if(but != 0)
 			wscroll(w, but);
 		goto Return;
 	}
 	if(but == 1)
 		wselect(w);
 	/* else all is handled by main process */
-   Return:
-	wclose(w);
+	Return:
+		wclose(w);
 }
 
 void
@@ -909,11 +910,10 @@ wdelete(Window *w, uint q0, uint q1)
 	}
 }
 
-
-static Window	*clickwin;
-static uint	clickmsec;
-static Window	*selectwin;
-static uint	selectq;
+static Window *clickwin;
+static uint clickmsec;
+static Window *selectwin;
+static uint selectq;
 
 /*
  * called from frame library
@@ -922,7 +922,7 @@ void
 framescroll(Frame *f, int dl)
 {
 	if(f != &selectwin->Frame)
-		error("frameselect not right frame");
+		error(Eframeselect);
 	wframescroll(selectwin, dl);
 }
 
@@ -959,7 +959,7 @@ wselect(Window *w)
 	uint q0, q1;
 	int b, x, y, first;
 
-	first = 1;
+	first = TRUE;
 	selectwin = w;
 	/*
 	 * Double-click immediately if it might make sense.
@@ -972,16 +972,16 @@ wselect(Window *w)
 	if(q0==q1 && selectq==w->q0){
 		wdoubleclick(w, &q0, &q1);
 		wsetselect(w, q0, q1);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		x = w->mc.xy.x;
 		y = w->mc.xy.y;
 		/* stay here until something interesting happens */
 		do
 			readmouse(&w->mc);
 		while(w->mc.buttons==b && abs(w->mc.xy.x-x)<3 && abs(w->mc.xy.y-y)<3);
-		w->mc.xy.x = x;	/* in case we're calling frselect */
+		w->mc.xy.x = x; /* in case we're calling frselect */
 		w->mc.xy.y = y;
-		q0 = w->q0;	/* may have changed */
+		q0 = w->q0; /* may have changed */
 		q1 = w->q1;
 		selectq = q0;
 	}
@@ -1012,24 +1012,24 @@ wselect(Window *w)
 	}else
 		clickwin = nil;
 	wsetselect(w, q0, q1);
-	flushimage(display, 1);
-	while(w->mc.buttons){
+	flushimage(display, TRUE);
+	while(w->mc.buttons != 0){
 		w->mc.msec = 0;
 		b = w->mc.buttons;
-		if(b & 6){
-			if(b & 2){
+		if((b & 6) != 0){
+			if((b & 2) != 0){
 				wsnarf(w);
 				wcut(w);
 			}else{
 				if(first){
-					first = 0;
+					first = FALSE;
 					getsnarf();
 				}
 				wpaste(w);
 			}
 		}
 		wscrdraw(w);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		while(w->mc.buttons == b)
 			readmouse(&w->mc);
 		clickwin = nil;
@@ -1037,7 +1037,7 @@ wselect(Window *w)
 }
 
 void
-wsendctlmesg(Window *w, int type, Rectangle r, Image *image)
+wsendctlmesg(Window *w, Mesgtype type, Rectangle r, Image *image)
 {
 	Wctlmesg wcm;
 
@@ -1047,14 +1047,14 @@ wsendctlmesg(Window *w, int type, Rectangle r, Image *image)
 	send(w->cctl, &wcm);
 }
 
-int
-wctlmesg(Window *w, int m, Rectangle r, Image *i)
+Mesgtype
+wctlmesg(Window *w, Mesgtype m, Rectangle r, Image *i)
 {
 	char buf[64];
 
 	switch(m){
 	default:
-		error("unknown control message");
+		error(Eunctlmsg);
 		break;
 	case Wakeup:
 		break;
@@ -1067,21 +1067,21 @@ wctlmesg(Window *w, int m, Rectangle r, Image *i)
 		w->screenr = r;
 		strcpy(buf, w->name);
 		wresize(w, i, m==Moved);
-		w->wctlready = 1;
+		w->wctlready = TRUE;
 		proccreate(deletetimeoutproc, estrdup(buf), 4096);
 		if(Dx(r) > 0){
 			if(w != input)
 				wcurrent(w);
 		}else if(w == input)
 			wcurrent(nil);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		break;
 	case Refresh:
 		if(w->deleted || Dx(w->screenr)<=0 || !rectclip(&r, w->i->r))
 			break;
 		if(!w->mouseopen)
 			wrefresh(w, r);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		break;
 	case Movemouse:
 		if(sweeping || !ptinrect(r.min, w->i->r))
@@ -1103,7 +1103,7 @@ wctlmesg(Window *w, int m, Rectangle r, Image *i)
 		if(w->deleted)
 			break;
 		wrepaint(w);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		break;
 	case Deleted:
 		if(w->deleted)
@@ -1165,8 +1165,8 @@ wborder(Window *w, int type)
 	border(w->i, w->i->r, Selborder, col, ZP);
 }
 
-Window*
-wpointto(Point pt)
+Window
+*wpointto(Point pt)
 {
 	int i;
 	Window *v, *w;
@@ -1193,17 +1193,17 @@ wcurrent(Window *w)
 	input = w;
 	if(oi!=w && oi!=nil)
 		wrepaint(oi);
-	if(w !=nil){
+	if(w != nil){
 		wrepaint(w);
-		wsetcursor(w, 0);
+		wsetcursor(w, FALSE);
 	}
 	if(w != oi){
-		if(oi){
-			oi->wctlready = 1;
+		if(oi != nil){
+			oi->wctlready = TRUE;
 			wsendctlmesg(oi, Wakeup, ZR, nil);
 		}
-		if(w){
-			w->wctlready = 1;
+		if(w != nil){
+			w->wctlready = TRUE;
 			wsendctlmesg(w, Wakeup, ZR, nil);
 		}
 	}
@@ -1235,18 +1235,18 @@ riosetcursor(Cursor *p, int force)
 	lastcursor = p;
 }
 
-Window*
-wtop(Point pt)
+Window
+*wtop(Point pt)
 {
 	Window *w;
 
 	w = wpointto(pt);
-	if(w){
+	if(w != nil){
 		if(w->topped == topped)
 			return nil;
 		topwindow(w->i);
 		wcurrent(w);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		w->topped = ++topped;
 	}
 	return w;
@@ -1257,8 +1257,8 @@ wtopme(Window *w)
 {
 	if(w!=nil && w->i!=nil && !w->deleted && w->topped!=topped){
 		topwindow(w->i);
-		flushimage(display, 1);
-		w->topped = ++ topped;
+		flushimage(display, TRUE);
+		w->topped = ++topped;
 	}
 }
 
@@ -1267,13 +1267,13 @@ wbottomme(Window *w)
 {
 	if(w!=nil && w->i!=nil && !w->deleted){
 		bottomwindow(w->i);
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		w->topped = - ++topped;
 	}
 }
 
-Window*
-wlookid(int id)
+Window
+*wlookid(int id)
 {
 	int i;
 
@@ -1292,7 +1292,7 @@ wclosewin(Window *w)
 	w->deleted = TRUE;
 	if(w == input){
 		input = nil;
-		wsetcursor(w, 0);
+		wsetcursor(w, FALSE);
 	}
 	if(w == wkeyboard)
 		wkeyboard = nil;
@@ -1315,7 +1315,7 @@ wclosewin(Window *w)
 			w->i = nil;
 			return;
 		}
-	error("unknown window in closewin");
+	error(Eunwindow);
 }
 
 void
@@ -1326,7 +1326,7 @@ wsetpid(Window *w, int pid, int dolabel)
 
 	w->pid = pid;
 	if(dolabel){
-		sprint(buf, "rc %d", pid);
+		sprint(buf, "%s %d", shellname, pid);
 		free(w->label);
 		w->label = estrdup(buf);
 	}
@@ -1370,20 +1370,20 @@ winshell(void *args)
 		sendul(pidc, 0);
 		threadexits("open");	/* BUG? was terminate() */
 	}
-	if(wclose(w) == 0){	/* remove extra ref hanging from creation */
+	if(!wclose(w)){	/* remove extra ref hanging from creation */
 		notify(nil);
 		dup(1, 2);
-		if(dir)
+		if(dir != nil)
 			chdir(dir);
 		procexec(pidc, cmd, argv);
 		_exits("exec failed");
 	}
 }
 
-static Rune left1[] =  { L'{', L'[', L'(', L'<', L'«', 0 };
+static Rune left1[] = { L'{', L'[', L'(', L'<', L'«', 0 };
 static Rune right1[] = { L'}', L']', L')', L'>', L'»', 0 };
-static Rune left2[] =  { L'\n', 0 };
-static Rune left3[] =  { L'\'', L'"', L'`', 0 };
+static Rune left2[] = { L'\n', 0 };
+static Rune left3[] = { L'\'', L'"', L'`', 0 };
 
 Rune *left[] = {
 	left1,
@@ -1465,13 +1465,12 @@ wclickmatch(Window *w, int cl, int cr, int dir, uint *q)
 		}
 		if(c == cr){
 			if(--nest==0)
-				return 1;
+				return TRUE;
 		}else if(c == cl)
 			nest++;
 	}
 	return cl=='\n' && nest==1;
 }
-
 
 uint
 wbacknl(Window *w, uint p, uint n)
@@ -1534,10 +1533,10 @@ wsetorigin(Window *w, uint org, int exact)
 		}
 	}
 	a = org-w->org;
-	fixup = 0;
+	fixup = FALSE;
 	if(a>=0 && a<w->nchars){
 		frdelete(w, 0, a);
-		fixup = 1;	/* frdelete can leave end of last line in wrong selection mode; it doesn't know what follows */
+		fixup = TRUE;	/* frdelete can leave end of last line in wrong selection mode; it doesn't know what follows */
 	}else if(a<0 && -a<w->nchars){
 		n = w->org - org;
 		r = runemalloc(n);
@@ -1551,7 +1550,7 @@ wsetorigin(Window *w, uint org, int exact)
 	wscrdraw(w);
 	wsetselect(w, w->q0, w->q1);
 	if(fixup && w->p1 > w->p0)
-		frdrawsel(w, frptofchar(w, w->p1-1), w->p1-1, w->p1, 1);
+		frdrawsel(w, frptofchar(w, w->p1-1), w->p1-1, w->p1, TRUE);
 }
 
 void
@@ -1578,29 +1577,29 @@ wsetselect(Window *w, uint q0, uint q1)
 	/* screen disagrees with desired selection */
 	if(w->p1<=p0 || p1<=w->p0 || p0==p1 || w->p1==w->p0){
 		/* no overlap or too easy to bother trying */
-		frdrawsel(w, frptofchar(w, w->p0), w->p0, w->p1, 0);
-		frdrawsel(w, frptofchar(w, p0), p0, p1, 1);
+		frdrawsel(w, frptofchar(w, w->p0), w->p0, w->p1, FALSE);
+		frdrawsel(w, frptofchar(w, p0), p0, p1, TRUE);
 		goto Return;
 	}
 	/* overlap; avoid unnecessary painting */
 	if(p0 < w->p0){
 		/* extend selection backwards */
-		frdrawsel(w, frptofchar(w, p0), p0, w->p0, 1);
+		frdrawsel(w, frptofchar(w, p0), p0, w->p0, TRUE);
 	}else if(p0 > w->p0){
 		/* trim first part of selection */
-		frdrawsel(w, frptofchar(w, w->p0), w->p0, p0, 0);
+		frdrawsel(w, frptofchar(w, w->p0), w->p0, p0, FALSE);
 	}
 	if(p1 > w->p1){
 		/* extend selection forwards */
-		frdrawsel(w, frptofchar(w, w->p1), w->p1, p1, 1);
+		frdrawsel(w, frptofchar(w, w->p1), w->p1, p1, TRUE);
 	}else if(p1 < w->p1){
 		/* trim last part of selection */
-		frdrawsel(w, frptofchar(w, p1), p1, w->p1, 0);
+		frdrawsel(w, frptofchar(w, p1), p1, w->p1, FALSE);
 	}
 
-    Return:
-	w->p0 = p0;
-	w->p1 = p1;
+	Return:
+		w->p0 = p0;
+		w->p1 = p1;
 }
 
 uint
@@ -1629,9 +1628,9 @@ winsert(Window *w, Rune *r, int n, uint q0)
 	if(w->nr+n > w->maxr){
 		/*
 		 * Minimize realloc breakage:
-		 *	Allocate at least MinWater
-		 * 	Double allocation size each time
-		 *	But don't go much above HiWater
+		 * Allocate at least MinWater
+		 * Double allocation size each time
+		 * But don't go much above HiWater
 		 */
 		m = max(min(2*(w->nr+n), HiWater), w->nr+n)+MinWater;
 		if(m > HiWater)
@@ -1692,8 +1691,8 @@ wfill(Window *w)
 	free(rp);
 }
 
-char*
-wcontents(Window *w, int *ip)
+char
+*wcontents(Window *w, int *ip)
 {
 	return runetobyte(w->r, w->nr, ip);
 }

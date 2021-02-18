@@ -9,11 +9,9 @@
 #include <fcall.h>
 #include <plumb.h>
 #include "dat.h"
+#include "err.h"
 #include "fns.h"
 #include <ctype.h>
-
-char	Ebadwr[]		= "bad rectangle in wctl request";
-char	Ewalloc[]		= "window allocation failed in wctl request";
 
 /* >= Top are disallowed if mouse button is pressed */
 enum
@@ -33,16 +31,16 @@ enum
 };
 
 static char *cmds[] = {
-	[New]	= "new",
+	[New]		= "new",
 	[Resize]	= "resize",
-	[Move]	= "move",
+	[Move]		= "move",
 	[Scroll]	= "scroll",
 	[Noscroll]	= "noscroll",
 	[Set]		= "set",
-	[Top]	= "top",
+	[Top]		= "top",
 	[Bottom]	= "bottom",
 	[Current]	= "current",
-	[Hide]	= "hide",
+	[Hide]		= "hide",
 	[Unhide]	= "unhide",
 	[Delete]	= "delete",
 	nil
@@ -66,19 +64,19 @@ enum
 };
 
 static char *params[] = {
-	[Cd]	 			= "-cd",
-	[Deltax]			= "-dx",
-	[Deltay]			= "-dy",
-	[Hidden]			= "-hide",
-	[Id]				= "-id",
-	[Maxx]			= "-maxx",
-	[Maxy]			= "-maxy",
-	[Minx]			= "-minx",
-	[Miny]			= "-miny",
-	[PID]				= "-pid",
-	[R]				= "-r",
-	[Scrolling]			= "-scroll",
-	[Noscrolling]		= "-noscroll",
+	[Cd]		= "-cd",
+	[Deltax]	= "-dx",
+	[Deltay]	= "-dy",
+	[Hidden]	= "-hide",
+	[Id]		= "-id",
+	[Maxx]		= "-maxx",
+	[Maxy]		= "-maxy",
+	[Minx]		= "-minx",
+	[Miny]		= "-miny",
+	[PID]		= "-pid",
+	[R]		= "-r",
+	[Scrolling]	= "-scroll",
+	[Noscrolling]	= "-noscroll",
 	nil
 };
 
@@ -89,18 +87,21 @@ int
 goodrect(Rectangle r)
 {
 	if(!eqrect(canonrect(r), r))
-		return 0;
-	if(Dx(r)<100 || Dy(r)<3*font->height)
-		return 0;
-	/* must have some screen and border visible so we can move it out of the way */
-	if(Dx(r) >= Dx(screen->r) && Dy(r) >= Dy(screen->r))
-		return 0;
+		return FALSE;
 	/* reasonable sizes only please */
 	if(Dx(r) > BIG*Dx(screen->r))
-		return 0;
-	if(Dy(r) > BIG*Dx(screen->r))
-		return 0;
-	return 1;
+		return FALSE;
+	if(Dy(r) > BIG*Dy(screen->r))
+		return FALSE;
+	if(Dx(r) < 100 || Dy(r) < 3*font->height)
+		return FALSE;
+	/* window must be on screen */
+	if(!rectXrect(screen->r, r))
+		return FALSE;
+	/* must have some screen and border visible so we can move it out of the way */
+	if(rectinrect(screen->r, insetrect(r, Borderwidth)))
+		return FALSE;
+	return TRUE;
 }
 
 static
@@ -188,7 +189,6 @@ riostrtol(char *s, char **t)
 	return n;
 }
 
-
 int
 parsewctl(char **argp, Rectangle r, Rectangle *rp, int *pidp, int *idp, int *hiddenp, int *scrollingp, char **cdp, char *s, char *err)
 {
@@ -196,28 +196,28 @@ parsewctl(char **argp, Rectangle r, Rectangle *rp, int *pidp, int *idp, int *hid
 	char *t;
 
 	*pidp = 0;
-	*hiddenp = 0;
+	*hiddenp = FALSE;
 	*scrollingp = scrolling;
 	*cdp = nil;
 	cmd = word(&s, cmds);
 	if(cmd < 0){
-		strcpy(err, "unrecognized wctl command");
+		strcpy(err, Eunwctlcmd);
 		return -1;
 	}
 	if(cmd == New)
 		r = newrect();
 
-	strcpy(err, "missing or bad wctl parameter");
+	strcpy(err, Emissingwctlparam);
 	while((param = word(&s, params)) >= 0){
 		switch(param){	/* special cases */
 		case Hidden:
-			*hiddenp = 1;
+			*hiddenp = TRUE;
 			continue;
 		case Scrolling:
-			*scrollingp = 1;
+			*scrollingp = TRUE;
 			continue;
 		case Noscrolling:
-			*scrollingp = 0;
+			*scrollingp = FALSE;
 			continue;
 		case R:
 			r.min.x = riostrtol(s, &t);
@@ -261,7 +261,7 @@ parsewctl(char **argp, Rectangle r, Rectangle *rp, int *pidp, int *idp, int *hid
 		xy = riostrtol(s, &s);
 		switch(param){
 		case -1:
-			strcpy(err, "unrecognized wctl parameter");
+			strcpy(err, Eunwctlparam);
 			return -1;
 		case Minx:
 			r.min.x = set(sign, r.min.x-xy, xy, r.min.x+xy);
@@ -297,11 +297,11 @@ parsewctl(char **argp, Rectangle r, Rectangle *rp, int *pidp, int *idp, int *hid
 	while(isspace(*s))
 		s++;
 	if(cmd!=New && *s!='\0'){
-		strcpy(err, "extraneous text in wctl message");
+		strcpy(err, Ewctlmsg);
 		return -1;
 	}
 
-	if(argp)
+	if(argp != nil)
 		*argp = s;
 
 	return cmd;
@@ -317,8 +317,8 @@ wctlnew(Rectangle rect, char *arg, int pid, int hideit, int scrollit, char *dir,
 		strcpy(err, Ebadwr);
 		return -1;
 	}
-	argv = emalloc(4*sizeof(char*));
-	argv[0] = "rc";
+	argv = emalloc(4*sizeof(char *));
+	argv[0] = shellname;
 	argv[1] = "-c";
 	while(isspace(*arg))
 		arg++;
@@ -330,7 +330,7 @@ wctlnew(Rectangle rect, char *arg, int pid, int hideit, int scrollit, char *dir,
 		argv[3] = nil;
 	}
 	if(hideit)
-		i = allocimage(display, rect, screen->chan, 0, DWhite);
+		i = allocimage(display, rect, screen->chan, FALSE, DWhite);
 	else
 		i = allocwindow(wscreen, rect, Refbackup, DWhite);
 	if(i == nil){
@@ -339,7 +339,7 @@ wctlnew(Rectangle rect, char *arg, int pid, int hideit, int scrollit, char *dir,
 	}
 	border(i, rect, Selborder, red, ZP);
 
-	new(i, hideit, scrollit, pid, dir, "/bin/rc", argv);
+	new(i, hideit, scrollit, pid, dir, shell, argv);
 
 	free(argv);	/* when new() returns, argv and args have been copied */
 	return 1;
@@ -365,7 +365,7 @@ writewctl(Xfid *x, char *err)
 		return -1;
 
 	if(mouse->buttons!=0 && cmd>=Top){
-		strcpy(err, "action disallowed when mouse active");
+		strcpy(err, Eact);
 		return -1;
 	}
 
@@ -374,12 +374,12 @@ writewctl(Xfid *x, char *err)
 			if(window[j]->id == id)
 				break;
 		if(j == nwindow){
-			strcpy(err, "no such window id");
+			strcpy(err, Eid);
 			return -1;
 		}
 		w = window[j];
 		if(w->deleted || w->i==nil){
-			strcpy(err, "window deleted");
+			strcpy(err, Edeleted);
 			return -1;
 		}
 	}
@@ -389,7 +389,7 @@ writewctl(Xfid *x, char *err)
 		return wctlnew(rect, arg, pid, hideit, scrollit, dir, err);
 	case Set:
 		if(pid > 0)
-			wsetpid(w, pid, 0);
+			wsetpid(w, pid, FALSE);
 		return 1;
 	case Move:
 		rect = Rect(rect.min.x, rect.min.y, rect.min.x+Dx(w->screenr), rect.min.y+Dy(w->screenr));
@@ -411,12 +411,12 @@ writewctl(Xfid *x, char *err)
 		wsendctlmesg(w, Reshaped, i->r, i);
 		return 1;
 	case Scroll:
-		w->scrolling = 1;
+		w->scrolling = TRUE;
 		wshow(w, w->nr);
 		wsendctlmesg(w, Wakeup, ZR, nil);
 		return 1;
 	case Noscroll:
-		w->scrolling = 0;
+		w->scrolling = FALSE;
 		wsendctlmesg(w, Wakeup, ZR, nil);
 		return 1;
 	case Top:
@@ -431,10 +431,10 @@ writewctl(Xfid *x, char *err)
 	case Hide:
 		switch(whide(w)){
 		case -1:
-			strcpy(err, "window already hidden");
+			strcpy(err, Ewhidden);
 			return -1;
 		case 0:
-			strcpy(err, "hide failed");
+			strcpy(err, Ehide);
 			return -1;
 		default:
 			break;
@@ -445,11 +445,11 @@ writewctl(Xfid *x, char *err)
 			if(hidden[j] == w)
 				break;
 		if(j == nhidden){
-			strcpy(err, "window not hidden");
+			strcpy(err, Enothidden);
 			return -1;
 		}
-		if(wunhide(j) == 0){
-			strcpy(err, "hide failed");
+		if(!wunhide(j)){
+			strcpy(err, Ehide);
 			return -1;
 		}
 		return 1;
@@ -457,7 +457,7 @@ writewctl(Xfid *x, char *err)
 		wsendctlmesg(w, Deleted, ZR, nil);
 		return 1;
 	}
-	strcpy(err, "invalid wctl message");
+	strcpy(err, Ebadwctlmsg);
 	return -1;
 }
 

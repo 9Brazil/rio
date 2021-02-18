@@ -9,36 +9,21 @@
 #include <fcall.h>
 #include <plumb.h>
 #include "dat.h"
+#include "err.h"
 #include "fns.h"
 
-#define	MAXSNARF	100*1024
+#define MAXSNARF 100*1024
 
-char Einuse[] =		"file in use";
-char Edeleted[] =	"window deleted";
-char Ebadreq[] =	"bad graphics request";
-char Etooshort[] =	"buffer too small";
-char Ebadtile[] =	"unknown tile";
-char Eshort[] =		"short i/o request";
-char Elong[] = 		"snarf buffer too long";
-char Eunkid[] = 	"unknown id in attach";
-char Ebadrect[] = 	"bad rectangle in attach";
-char Ewindow[] = 	"cannot make window";
-char Enowindow[] = 	"window has no image";
-char Ebadmouse[] = 	"bad format on /dev/mouse";
-char Ebadwrect[] = 	"rectangle outside screen";
-char Ebadoffset[] = 	"window read not on scan line boundary";
-extern char Eperm[];
+static Xfid	*xfidfree;
+static Xfid	*xfid;
+static Channel	*cxfidalloc;	/* chan(Xfid *) */
+static Channel	*cxfidfree;	/* chan(Xfid *) */
 
-static	Xfid	*xfidfree;
-static	Xfid	*xfid;
-static	Channel	*cxfidalloc;	/* chan(Xfid*) */
-static	Channel	*cxfidfree;	/* chan(Xfid*) */
-
-static	char	*tsnarf;
-static	int	ntsnarf;
+static char	*tsnarf;
+static int	ntsnarf;
 
 void
-xfidallocthread(void*)
+xfidallocthread(void *)
 {
 	Xfid *x;
 	enum { Alloc, Free, N };
@@ -55,12 +40,12 @@ xfidallocthread(void*)
 		switch(alt(alts)){
 		case Alloc:
 			x = xfidfree;
-			if(x)
+			if(x != nil)
 				xfidfree = x->free;
 			else{
 				x = emalloc(sizeof(Xfid));
-				x->c = chancreate(sizeof(void(*)(Xfid*)), 0);
-				x->flushc = chancreate(sizeof(int), 0);	/* notification only; no data */
+				x->c = chancreate(sizeof(void(*)(Xfid *)), 0);
+				x->flushc = chancreate(sizeof(int), 0); /* notification only; no data */
 				x->flushtag = -1;
 				x->next = xfid;
 				xfid = x;
@@ -68,20 +53,20 @@ xfidallocthread(void*)
 			}
 			if(x->ref != 0){
 				fprint(2, "%p incref %ld\n", x, x->ref);
-				error("incref");
+				error(Eincref);
 			}
 			if(x->flushtag != -1)
-				error("flushtag in allocate");
+				error(Eflushtagalloc);
 			incref(x);
 			sendp(cxfidalloc, x);
 			break;
 		case Free:
 			if(x->ref != 0){
 				fprint(2, "%p decref %ld\n", x, x->ref);
-				error("decref");
+				error(Edecref);
 			}
 			if(x->flushtag != -1)
-				error("flushtag in free");
+				error(Eflushtagfree);
 			x->free = xfidfree;
 			xfidfree = x;
 			break;
@@ -89,11 +74,11 @@ xfidallocthread(void*)
 	}
 }
 
-Channel*
-xfidinit(void)
+Channel
+*xfidinit(void)
 {
-	cxfidalloc = chancreate(sizeof(Xfid*), 0);
-	cxfidfree = chancreate(sizeof(Xfid*), 0);
+	cxfidalloc = chancreate(sizeof(Xfid *), 0);
+	cxfidfree = chancreate(sizeof(Xfid *), 0);
 	threadcreate(xfidallocthread, nil, STACK);
 	return cxfidalloc;
 }
@@ -102,7 +87,7 @@ void
 xfidctl(void *arg)
 {
 	Xfid *x;
-	void (*f)(Xfid*);
+	void (*f)(Xfid *);
 	char buf[64];
 
 	x = arg;
@@ -128,7 +113,7 @@ xfidflush(Xfid *x)
 			xf->flushing = TRUE;
 			incref(xf);	/* to hold data structures up at tail of synchronization */
 			if(xf->ref == 1)
-				error("ref 1 in flush");
+				error(Eref1);
 			if(canqlock(&xf->active)){
 				qunlock(&xf->active);
 				sendul(xf->flushc, 0);
@@ -160,9 +145,9 @@ xfidattach(Xfid *x)
 	w = nil;
 	err = Eunkid;
 	newlymade = FALSE;
-	hideit = 0;
+	hideit = FALSE;
 
-	if(x->aname[0] == 'N'){	/* N 100,100, 200, 200 - old syntax */
+	if(x->aname[0] == 'N'){ /* N 100,100, 200, 200 - old syntax */
 		n = x->aname+1;
 		pid = strtoul(n, &n, 0);
 		if(*n == ',')
@@ -185,12 +170,12 @@ xfidattach(Xfid *x)
 				i = allocimage(display, r, screen->chan, 0, DWhite);
 			else
 				i = allocwindow(wscreen, r, Refbackup, DWhite);
-			if(i){
+			if(i != nil){
 				border(i, r, Selborder, display->black, ZP);
 				if(pid == 0)
 					pid = -1;	/* make sure we don't pop a shell! - UGH */
 				w = new(i, hideit, scrolling, pid, nil, nil, nil);
-				flushimage(display, 1);
+				flushimage(display, TRUE);
 				newlymade = TRUE;
 			}else
 				err = Ewindow;
@@ -238,7 +223,7 @@ xfidopen(Xfid *x)
 		w->ctlopen = TRUE;
 		break;
 	case Qkbdin:
-		if(w !=  wkeyboard){
+		if(w != wkeyboard){
 			filsysrespond(x->fs, x, &t, Eperm);
 			return;
 		}
@@ -261,7 +246,7 @@ xfidopen(Xfid *x)
 		break;
 	case Qsnarf:
 		if(x->mode==ORDWR || x->mode==OWRITE){
-			if(tsnarf)
+			if(tsnarf != nil)
 				free(tsnarf);	/* collision, but OK */
 			ntsnarf = 0;
 			tsnarf = malloc(1);
@@ -275,14 +260,14 @@ xfidopen(Xfid *x)
 			 * structured for that.  It's structured for /dev/cons, which gives
 			 * alternate data to alternate readers.  So to keep things sane for
 			 * wctl, we compromise and give an error if two people try to
-			 * open it.  Apologies.
+			 * open it. Apologies.
 			 */
 			if(w->wctlopen){
 				filsysrespond(x->fs, x, &t, Einuse);
 				return;
 			}
 			w->wctlopen = TRUE;
-			w->wctlready = 1;
+			w->wctlready = TRUE;
 			wsendctlmesg(w, Wakeup, ZR, nil);
 		}
 		break;
@@ -397,7 +382,7 @@ xfidwrite(Xfid *x)
 		alts[CWflush].v = nil;
 		alts[CWflush].op = CHANRCV;
 		alts[NCW].op = CHANEND;
-	
+
 		switch(alt(alts)){
 		case CWdata:
 			break;
@@ -412,7 +397,7 @@ xfidwrite(Xfid *x)
 			recv(x->flushc, nil);	/* wake up flushing xfid */
 			pair.s = runemalloc(1);
 			pair.ns = 0;
-			send(cwm.cw, &pair);		/* wake up window with empty data */
+			send(cwm.cw, &pair);	/* wake up window with empty data */
 			filsyscancel(x);
 			return;
 		}
@@ -450,7 +435,7 @@ xfidwrite(Xfid *x)
 				wsendctlmesg(w, Rawoff, ZR, nil);
 			break;
 		}
-		filsysrespond(x->fs, x, &fc, "unknown control message");
+		filsysrespond(x->fs, x, &fc, Eunctlmsg);
 		return;
 
 	case Qcursor:
@@ -467,7 +452,7 @@ xfidwrite(Xfid *x)
 
 	case Qlabel:
 		if(off != 0){
-			filsysrespond(x->fs, x, &fc, "non-zero offset writing label");
+			filsysrespond(x->fs, x, &fc, Eoffset);
 			return;
 		}
 		free(w->label);
@@ -496,7 +481,7 @@ xfidwrite(Xfid *x)
 
 	case Qsnarf:
 		/* always append only */
-		if(ntsnarf > MAXSNARF){	/* avoid thrashing when people cut huge text */
+		if(ntsnarf > MAXSNARF){ /* avoid thrashing when people cut huge text */
 			filsysrespond(x->fs, x, &fc, Elong);
 			return;
 		}
@@ -540,7 +525,7 @@ xfidwrite(Xfid *x)
 			filsysrespond(x->fs, x, &fc, buf);
 			return;
 		}
-		flushimage(display, 1);
+		flushimage(display, TRUE);
 		break;
 
 	default:
@@ -568,7 +553,7 @@ readwindow(Image *i, char *t, Rectangle r, int offset, int n)
 		r.max.y = y;
 	if(r.max.y <= r.min.y)
 		return 0;
-	return unloadimage(i, r, (uchar*)t, n);
+	return unloadimage(i, r, (uchar *)t, n);
 }
 
 void
@@ -583,7 +568,7 @@ xfidread(Xfid *x)
 	Mouse ms;
 	Rectangle r;
 	Image *i;
-	Channel *c1, *c2;	/* chan (tuple(char*, int)) */
+	Channel *c1, *c2;	/* chan (tuple(char *, int)) */
 	Consreadmesg crm;
 	Mousereadmesg mrm;
 	Consreadmesg cwrm;
@@ -631,7 +616,7 @@ xfidread(Xfid *x)
 		send(c1, &pair);
 		if(x->flushing){
 			recv(x->flushc, nil);	/* wake up flushing xfid */
-			recv(c2, nil);			/* wake up window and toss data */
+			recv(c2, nil);		/* wake up window and toss data */
 			free(t);
 			filsyscancel(x);
 			return;
@@ -678,8 +663,8 @@ xfidread(Xfid *x)
 		/* received data */
 		x->flushtag = -1;
 		if(x->flushing){
-			recv(x->flushc, nil);		/* wake up flushing xfid */
-			recv(mrm.cm, nil);			/* wake up window and toss data */
+			recv(x->flushc, nil);	/* wake up flushing xfid */
+			recv(mrm.cm, nil);	/* wake up window and toss data */
 			filsyscancel(x);
 			return;
 		}
@@ -689,7 +674,7 @@ xfidread(Xfid *x)
 		if(w->resized)
 			c = 'r';
 		n = sprint(buf, "%c%11d %11d %11d %11ld ", c, ms.xy.x, ms.xy.y, ms.buttons, ms.msec);
-		w->resized = 0;
+		w->resized = FALSE;
 		fc.data = buf;
 		fc.count = min(n, cnt);
 		filsysrespond(x->fs, x, &fc, nil);
@@ -697,7 +682,7 @@ xfidread(Xfid *x)
 		break;
 
 	case Qcursor:
-		filsysrespond(x->fs, x, &fc, "cursor read not implemented");
+		filsysrespond(x->fs, x, &fc, Ecursor);
 		break;
 
 	/* The algorithm for snarf and text is expensive but easy and rarely used */
@@ -742,7 +727,7 @@ xfidread(Xfid *x)
 	case Qwinname:
 		n = strlen(w->name);
 		if(n == 0){
-			filsysrespond(x->fs, x, &fc, "window has no name");
+			filsysrespond(x->fs, x, &fc, Enoname);
 			break;
 		}
 		t = estrdup(w->name);
@@ -760,7 +745,7 @@ xfidread(Xfid *x)
 	case Qscreen:
 		i = display->image;
 		if(i == nil){
-			filsysrespond(x->fs, x, &fc, "no top-level screen");
+			filsysrespond(x->fs, x, &fc, Etoplevelscrn);
 			break;
 		}
 		r = i->r;
@@ -821,7 +806,7 @@ xfidread(Xfid *x)
 		send(c1, &pair);
 		if(x->flushing){
 			recv(x->flushc, nil);	/* wake up flushing xfid */
-			recv(c2, nil);			/* wake up window and toss data */
+			recv(c2, nil);		/* wake up window and toss data */
 			free(t);
 			filsyscancel(x);
 			return;
