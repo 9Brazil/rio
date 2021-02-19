@@ -299,9 +299,9 @@ setshell(void)
 	for(i = strlen(shell)-1; i >= 0; i--)
 		if(shell[i] == '/')
 			break;
-	l = strlen(shell)-i;
-	shellname = (char *)malloc(sizeof(char)*(l+1));
-	strncpy(shellname, shell+i+1, l);
+	l = strlen(shell)-i-1;
+	shellname = (char *)malloc(sizeof(char)*l);
+	strcpy(shellname, shell+i+1);
 	shargv[0] = shellname;
 	kbdargv[0] = shellname;
 }
