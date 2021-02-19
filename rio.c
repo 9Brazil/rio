@@ -171,7 +171,7 @@ threadmain(int argc, char *argv[])
 	free(s);
 	/* check font before barging ahead */
 	if(access(fontname, AEXIST) < 0){
-		fprint(2, "rio: can't access %s: %r\n", fontname);
+		fprint(2, "rio: can't access font %s: %r\n", fontname);
 		exits("font open");
 	}
 	putenv("font", fontname);
@@ -291,7 +291,7 @@ setshell(void)
 	if(shell == nil)
 		shell = DEFAULTSHELL;
 	if(access(shell, AEXEC) < 0){
-		fprint(2, "rio: can't access %s: %r\n", shell);
+		fprint(2, "rio: can't access shell %s: %r\n", shell);
 		exits("shell");
 	}
 	putenv("shell", shell);

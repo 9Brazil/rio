@@ -12,8 +12,6 @@
 #include "err.h"
 #include "fns.h"
 
-#define MAXSNARF 100*1024
-
 static Xfid	*xfidfree;
 static Xfid	*xfid;
 static Channel	*cxfidalloc;	/* chan(Xfid *) */
