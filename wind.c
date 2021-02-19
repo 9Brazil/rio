@@ -42,19 +42,18 @@ Window
 	Rectangle r;
 
 	if(cols[0] == nil){
-		/* greys are multiples of 0x11111100+0xFF, 14* being palest */
-		grey = alloccolor(DGrey200,RGB24);
-		darkgrey = alloccolor(DGrey40,RGB24);
-		cols[BACK] = display->white;
-		cols[HIGH] = alloccolor(DGrey80,RGB24);
+		grey = alloccolor(DGrey200, RGB24);
+		darkgrey = alloccolor(DGrey40, RGB24);
+		cols[BACK] = alloccolor(CLWINDOW, RGB24);
+		cols[HIGH] = alloccolor(CLHIGHLIGHT,RGB24);
 		cols[BORD] = alloccolor(DGrey60,RGB24);
-		cols[TEXT] = display->black;
-		cols[HTEXT] = display->black;
-		titlecol = alloccolor(DGreygreen,RGB24);
-		lighttitlecol = alloccolor(DPalegreygreen,RGB24);
-		holdcol = alloccolor(DMedblue,RGB24);
-		lightholdcol = alloccolor(DGreyblue,RGB24);
-		paleholdcol = alloccolor(DPalegreyblue,RGB24);
+		cols[TEXT] = alloccolor(CLWINDOWTEXT, RGB24);
+		cols[HTEXT] = alloccolor(CLHIGHLIGHTTEXT, RGB24);
+		titlecol = alloccolor(DGreygreen, RGB24);
+		lighttitlecol = alloccolor(DPalegreygreen, RGB24);
+		holdcol = alloccolor(DMedblue, RGB24);
+		lightholdcol = alloccolor(DGreyblue, RGB24);
+		paleholdcol = alloccolor(DPalegreyblue, RGB24);
 	}
 	w = emalloc(sizeof(Window));
 	w->screenr = i->r;

@@ -72,7 +72,14 @@ enum
 	DGrey80		= 0xCCCCCCFF,
 	DGrey200	= 0xEEEEEEFF,
 	DPurered	= 0xDD0000FF,
+	DTeal		= 0x008080FF,
 };
+
+#define CLBACKGROUND		DTeal
+#define CLWINDOW		DBlack
+#define CLWINDOWTEXT		DWhite
+#define CLHIGHLIGHT		DWhite
+#define CLHIGHLIGHTTEXT	DBlack
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
 
