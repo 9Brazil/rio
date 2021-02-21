@@ -25,15 +25,30 @@ enum
 static int topped;
 static int id;
 
-static Image *cols[NCOL];
-static Image *grey;
-static Image *darkgrey;
 static Cursor *lastcursor;
-static Image *titlecol;
-static Image *lighttitlecol;
-static Image *holdcol;
-static Image *lightholdcol;
-static Image *paleholdcol;
+
+static Image *cols[NCOL];
+
+/* text color */
+static Image *text00;
+static Image *text01;
+static Image *text10;
+static Image *text11;
+/* highlighted text color */
+static Image *htext00;
+static Image *htext01;
+static Image *htext10;
+static Image *htext11;
+/* highlight background color */
+static Image *high00;
+static Image *high01;
+static Image *high10;
+static Image *high11;
+/* border color */
+static Image *bord00;
+static Image *bord01;
+static Image *bord10;
+static Image *bord11;
 
 Window
 *wmk(Image *i, Mousectl *mc, Channel *ck, Channel *cctl, int scrolling)
@@ -42,18 +57,27 @@ Window
 	Rectangle r;
 
 	if(cols[0] == nil){
-		grey = alloccolor(DGrey200, RGB24);
-		darkgrey = alloccolor(DGrey40, RGB24);
+		bord11 = alloccolor(CLBORDER11, RGB24);
+		bord01 = alloccolor(CLBORDER01, RGB24);
+		bord10 = alloccolor(CLBORDER10, RGB24);
+		bord00 = alloccolor(CLBORDER00, RGB24);
+		text11 = alloccolor(CLWINDOWTEXT11, RGB24);
+		text01 = alloccolor(CLWINDOWTEXT01, RGB24);
+		text10 = alloccolor(CLWINDOWTEXT10, RGB24);
+		text00 = alloccolor(CLWINDOWTEXT00, RGB24);
+		high11 = alloccolor(CLHIGHLIGHT11, RGB24);
+		high01 = alloccolor(CLHIGHLIGHT01, RGB24);
+		high10 = alloccolor(CLHIGHLIGHT10, RGB24);
+		high00 = alloccolor(CLHIGHLIGHT00, RGB24);
+		htext11 = alloccolor(CLHIGHLIGHTTEXT11, RGB24);
+		htext01 = alloccolor(CLHIGHLIGHTTEXT01, RGB24);
+		htext10 = alloccolor(CLHIGHLIGHTTEXT10, RGB24);
+		htext00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
 		cols[BACK] = alloccolor(CLWINDOW, RGB24);
-		cols[HIGH] = alloccolor(CLHIGHLIGHT,RGB24);
-		cols[BORD] = alloccolor(DGrey60,RGB24);
-		cols[TEXT] = alloccolor(CLWINDOWTEXT, RGB24);
-		cols[HTEXT] = alloccolor(CLHIGHLIGHTTEXT, RGB24);
-		titlecol = alloccolor(DGreygreen, RGB24);
-		lighttitlecol = alloccolor(DPalegreygreen, RGB24);
-		holdcol = alloccolor(DMedblue, RGB24);
-		lightholdcol = alloccolor(DGreyblue, RGB24);
-		paleholdcol = alloccolor(DPalegreyblue, RGB24);
+		cols[HIGH] = high11;
+		cols[BORD] = alloccolor(DGrey60, RGB24);
+		cols[TEXT] = text11;
+		cols[HTEXT] = htext11;
 	}
 	w = emalloc(sizeof(Window));
 	w->screenr = i->r;
@@ -694,15 +718,25 @@ void
 wsetcols(Window *w)
 {
 	if(w->holding)
-		if(w == input)
-			w->cols[TEXT] = w->cols[HTEXT] = holdcol;
-		else
-			w->cols[TEXT] = w->cols[HTEXT] = lightholdcol;
+		if(w == input){
+			w->cols[TEXT] = text11;
+			w->cols[HTEXT] = htext11;
+			w->cols[HIGH] = high11;
+		}else{
+			w->cols[TEXT] = text01;
+			w->cols[HTEXT] = htext01;
+			w->cols[HIGH] = high01;
+		}
 	else
-		if(w == input)
-			w->cols[TEXT] = w->cols[HTEXT] = display->black;
-		else
-			w->cols[TEXT] = w->cols[HTEXT] = darkgrey;
+		if(w == input){
+			w->cols[TEXT] = text10;
+			w->cols[HTEXT] = htext10;
+			w->cols[HIGH] = high10;
+		}else{
+			w->cols[TEXT] = text00;
+			w->cols[HTEXT] = htext00;
+			w->cols[HIGH] = high00;
+		}
 }
 
 void
@@ -1151,14 +1185,14 @@ wborder(Window *w, int type)
 		return;
 	if(w->holding){
 		if(type == Selborder)
-			col = holdcol;
+			col = bord11;
 		else
-			col = paleholdcol;
+			col = bord01;
 	}else{
 		if(type == Selborder)
-			col = titlecol;
+			col = bord10;
 		else
-			col = lighttitlecol;
+			col = bord00;
 	}
 
 	border(w->i, w->i->r, Selborder, col, ZP);

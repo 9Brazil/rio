@@ -66,20 +66,34 @@ enum
 
 enum
 {
-	DGrey40		= 0x666666FF,
-	DGrey47		= 0x777777FF,
+	DDodgerblue	= 0x3399FFFF,
 	DGrey60		= 0x999999FF,
-	DGrey80		= 0xCCCCCCFF,
-	DGrey200	= 0xEEEEEEFF,
+	DNavajowhite	= 0xFEDBA9FF,
+	DNavy		= 0x000080FF,
+	DPinetree	= 0x11120FFF,
 	DPurered	= 0xDD0000FF,
+	DSilver		= 0xC0C0C0FF,
 	DTeal		= 0x008080FF,
 };
 
 #define CLBACKGROUND		DTeal
 #define CLWINDOW		DBlack
-#define CLWINDOWTEXT		DWhite
-#define CLHIGHLIGHT		DWhite
-#define CLHIGHLIGHTTEXT	DBlack
+#define CLWINDOWTEXT11		DWhite
+#define CLWINDOWTEXT01		DWhite
+#define CLWINDOWTEXT10		DSilver
+#define CLWINDOWTEXT00		DSilver
+#define CLHIGHLIGHT11		DNavy
+#define CLHIGHLIGHT01		DDodgerblue
+#define CLHIGHLIGHT10		DNavajowhite
+#define CLHIGHLIGHT00		DSilver
+#define CLHIGHLIGHTTEXT11	DWhite
+#define CLHIGHLIGHTTEXT01	DWhite
+#define CLHIGHLIGHTTEXT10	DPinetree
+#define CLHIGHLIGHTTEXT00	DPinetree
+#define CLBORDER11		DMedblue
+#define CLBORDER01		DPalegreyblue
+#define CLBORDER10		DGreygreen
+#define CLBORDER00		DPalegreygreen
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
 
