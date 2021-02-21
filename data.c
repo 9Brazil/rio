@@ -540,6 +540,6 @@ Cursor *corners[9] = {
 void
 iconinit(void)
 {
-	background  = alloccolor(CLBACKGROUND, RGB24);
-	red         = alloccolor(DPurered, RGB24);
+	background	= alloccolor(CLBACKGROUND, RGB24);
+	actioncol	= alloccolor(CLACTIONBORDER, RGB24);
 }

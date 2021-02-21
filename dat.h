@@ -94,6 +94,7 @@ enum
 #define CLBORDER01		DPalegreyblue
 #define CLBORDER10		DGreygreen
 #define CLBORDER00		DPalegreygreen
+#define CLACTIONBORDER		DPurered
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
 
@@ -358,8 +359,7 @@ Cursor			whitearrow;
 Cursor			query;
 Cursor			*corners[9];
 Image			*background;
-Image			*lightgrey;
-Image			*red;
+Image			*actioncol;
 Window			**window;
 Window			*wkeyboard;	/* window of simulated keyboard */
 int			nwindow;

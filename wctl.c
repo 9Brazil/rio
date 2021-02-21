@@ -337,7 +337,7 @@ wctlnew(Rectangle rect, char *arg, int pid, int hideit, int scrollit, char *dir,
 		strcpy(err, Ewalloc);
 		return -1;
 	}
-	border(i, rect, Selborder, red, ZP);
+	border(i, rect, Selborder, actioncol, ZP);
 
 	new(i, hideit, scrollit, pid, dir, shell, argv);
 
@@ -407,7 +407,7 @@ writewctl(Xfid *x, char *err)
 			strcpy(err, Ewalloc);
 			return -1;
 		}
-		border(i, rect, Selborder, red, ZP);
+		border(i, rect, Selborder, actioncol, ZP);
 		wsendctlmesg(w, Reshaped, i->r, i);
 		return 1;
 	case Scroll:

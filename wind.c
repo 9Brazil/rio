@@ -30,25 +30,25 @@ static Cursor *lastcursor;
 static Image *cols[NCOL];
 
 /* text color */
-static Image *text00;
-static Image *text01;
-static Image *text10;
-static Image *text11;
+static Image *textcol00;
+static Image *textcol01;
+static Image *textcol10;
+static Image *textcol11;
 /* highlighted text color */
-static Image *htext00;
-static Image *htext01;
-static Image *htext10;
-static Image *htext11;
+static Image *htextcol00;
+static Image *htextcol01;
+static Image *htextcol10;
+static Image *htextcol11;
 /* highlight background color */
-static Image *high00;
-static Image *high01;
-static Image *high10;
-static Image *high11;
+static Image *highcol00;
+static Image *highcol01;
+static Image *highcol10;
+static Image *highcol11;
 /* border color */
-static Image *bord00;
-static Image *bord01;
-static Image *bord10;
-static Image *bord11;
+static Image *bordcol00;
+static Image *bordcol01;
+static Image *bordcol10;
+static Image *bordcol11;
 
 Window
 *wmk(Image *i, Mousectl *mc, Channel *ck, Channel *cctl, int scrolling)
@@ -57,27 +57,27 @@ Window
 	Rectangle r;
 
 	if(cols[0] == nil){
-		bord11 = alloccolor(CLBORDER11, RGB24);
-		bord01 = alloccolor(CLBORDER01, RGB24);
-		bord10 = alloccolor(CLBORDER10, RGB24);
-		bord00 = alloccolor(CLBORDER00, RGB24);
-		text11 = alloccolor(CLWINDOWTEXT11, RGB24);
-		text01 = alloccolor(CLWINDOWTEXT01, RGB24);
-		text10 = alloccolor(CLWINDOWTEXT10, RGB24);
-		text00 = alloccolor(CLWINDOWTEXT00, RGB24);
-		high11 = alloccolor(CLHIGHLIGHT11, RGB24);
-		high01 = alloccolor(CLHIGHLIGHT01, RGB24);
-		high10 = alloccolor(CLHIGHLIGHT10, RGB24);
-		high00 = alloccolor(CLHIGHLIGHT00, RGB24);
-		htext11 = alloccolor(CLHIGHLIGHTTEXT11, RGB24);
-		htext01 = alloccolor(CLHIGHLIGHTTEXT01, RGB24);
-		htext10 = alloccolor(CLHIGHLIGHTTEXT10, RGB24);
-		htext00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
+		bordcol11 = alloccolor(CLBORDER11, RGB24);
+		bordcol01 = alloccolor(CLBORDER01, RGB24);
+		bordcol10 = alloccolor(CLBORDER10, RGB24);
+		bordcol00 = alloccolor(CLBORDER00, RGB24);
+		textcol11 = alloccolor(CLWINDOWTEXT11, RGB24);
+		textcol01 = alloccolor(CLWINDOWTEXT01, RGB24);
+		textcol10 = alloccolor(CLWINDOWTEXT10, RGB24);
+		textcol00 = alloccolor(CLWINDOWTEXT00, RGB24);
+		highcol11 = alloccolor(CLHIGHLIGHT11, RGB24);
+		highcol01 = alloccolor(CLHIGHLIGHT01, RGB24);
+		highcol10 = alloccolor(CLHIGHLIGHT10, RGB24);
+		highcol00 = alloccolor(CLHIGHLIGHT00, RGB24);
+		htextcol11 = alloccolor(CLHIGHLIGHTTEXT11, RGB24);
+		htextcol01 = alloccolor(CLHIGHLIGHTTEXT01, RGB24);
+		htextcol10 = alloccolor(CLHIGHLIGHTTEXT10, RGB24);
+		htextcol00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
 		cols[BACK] = alloccolor(CLWINDOW, RGB24);
-		cols[HIGH] = high11;
+		cols[HIGH] = highcol11;
 		cols[BORD] = alloccolor(DGrey60, RGB24);
-		cols[TEXT] = text11;
-		cols[HTEXT] = htext11;
+		cols[TEXT] = textcol11;
+		cols[HTEXT] = htextcol11;
 	}
 	w = emalloc(sizeof(Window));
 	w->screenr = i->r;
@@ -719,23 +719,23 @@ wsetcols(Window *w)
 {
 	if(w->holding)
 		if(w == input){
-			w->cols[TEXT] = text11;
-			w->cols[HTEXT] = htext11;
-			w->cols[HIGH] = high11;
+			w->cols[TEXT] = textcol11;
+			w->cols[HTEXT] = htextcol11;
+			w->cols[HIGH] = highcol11;
 		}else{
-			w->cols[TEXT] = text01;
-			w->cols[HTEXT] = htext01;
-			w->cols[HIGH] = high01;
+			w->cols[TEXT] = textcol01;
+			w->cols[HTEXT] = htextcol01;
+			w->cols[HIGH] = highcol01;
 		}
 	else
 		if(w == input){
-			w->cols[TEXT] = text10;
-			w->cols[HTEXT] = htext10;
-			w->cols[HIGH] = high10;
+			w->cols[TEXT] = textcol10;
+			w->cols[HTEXT] = htextcol10;
+			w->cols[HIGH] = highcol10;
 		}else{
-			w->cols[TEXT] = text00;
-			w->cols[HTEXT] = htext00;
-			w->cols[HIGH] = high00;
+			w->cols[TEXT] = textcol00;
+			w->cols[HTEXT] = htextcol00;
+			w->cols[HIGH] = highcol00;
 		}
 }
 
@@ -1185,14 +1185,14 @@ wborder(Window *w, int type)
 		return;
 	if(w->holding){
 		if(type == Selborder)
-			col = bord11;
+			col = bordcol11;
 		else
-			col = bord01;
+			col = bordcol01;
 	}else{
 		if(type == Selborder)
-			col = bord10;
+			col = bordcol10;
 		else
-			col = bord00;
+			col = bordcol00;
 	}
 
 	border(w->i, w->i->r, Selborder, col, ZP);
