@@ -540,6 +540,27 @@ Cursor *corners[9] = {
 void
 iconinit(void)
 {
-	background	= alloccolor(CLBACKGROUND, RGB24);
-	actioncol	= alloccolor(CLACTIONBORDER, RGB24);
+	background = alloccolor(CLBACKGROUND, RGB24);
+	actioncol = alloccolor(CLACTIONBORDER, RGB24);
+	bordcol11 = alloccolor(CLBORDER11, RGB24);
+	bordcol01 = alloccolor(CLBORDER01, RGB24);
+	bordcol10 = alloccolor(CLBORDER10, RGB24);
+	bordcol00 = alloccolor(CLBORDER00, RGB24);
+	textcol11 = alloccolor(CLWINDOWTEXT11, RGB24);
+	textcol01 = alloccolor(CLWINDOWTEXT01, RGB24);
+	textcol10 = alloccolor(CLWINDOWTEXT10, RGB24);
+	textcol00 = alloccolor(CLWINDOWTEXT00, RGB24);
+	highcol11 = alloccolor(CLHIGHLIGHT11, RGB24);
+	highcol01 = alloccolor(CLHIGHLIGHT01, RGB24);
+	highcol10 = alloccolor(CLHIGHLIGHT10, RGB24);
+	highcol00 = alloccolor(CLHIGHLIGHT00, RGB24);
+	htextcol11 = alloccolor(CLHIGHLIGHTTEXT11, RGB24);
+	htextcol01 = alloccolor(CLHIGHLIGHTTEXT01, RGB24);
+	htextcol10 = alloccolor(CLHIGHLIGHTTEXT10, RGB24);
+	htextcol00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
+	cols[BACK] = alloccolor(CLWINDOW, RGB24);
+	cols[HIGH] = highcol11;
+	cols[BORD] = alloccolor(DGrey60, RGB24);
+	cols[TEXT] = textcol11;
+	cols[HTEXT] = htextcol11;
 }

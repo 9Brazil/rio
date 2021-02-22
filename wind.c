@@ -27,58 +27,11 @@ static int id;
 
 static Cursor *lastcursor;
 
-static Image *cols[NCOL];
-
-/* text color */
-static Image *textcol00;
-static Image *textcol01;
-static Image *textcol10;
-static Image *textcol11;
-/* highlighted text color */
-static Image *htextcol00;
-static Image *htextcol01;
-static Image *htextcol10;
-static Image *htextcol11;
-/* highlight background color */
-static Image *highcol00;
-static Image *highcol01;
-static Image *highcol10;
-static Image *highcol11;
-/* border color */
-static Image *bordcol00;
-static Image *bordcol01;
-static Image *bordcol10;
-static Image *bordcol11;
-
 Window
 *wmk(Image *i, Mousectl *mc, Channel *ck, Channel *cctl, int scrolling)
 {
 	Window *w;
 	Rectangle r;
-
-	if(cols[0] == nil){
-		bordcol11 = alloccolor(CLBORDER11, RGB24);
-		bordcol01 = alloccolor(CLBORDER01, RGB24);
-		bordcol10 = alloccolor(CLBORDER10, RGB24);
-		bordcol00 = alloccolor(CLBORDER00, RGB24);
-		textcol11 = alloccolor(CLWINDOWTEXT11, RGB24);
-		textcol01 = alloccolor(CLWINDOWTEXT01, RGB24);
-		textcol10 = alloccolor(CLWINDOWTEXT10, RGB24);
-		textcol00 = alloccolor(CLWINDOWTEXT00, RGB24);
-		highcol11 = alloccolor(CLHIGHLIGHT11, RGB24);
-		highcol01 = alloccolor(CLHIGHLIGHT01, RGB24);
-		highcol10 = alloccolor(CLHIGHLIGHT10, RGB24);
-		highcol00 = alloccolor(CLHIGHLIGHT00, RGB24);
-		htextcol11 = alloccolor(CLHIGHLIGHTTEXT11, RGB24);
-		htextcol01 = alloccolor(CLHIGHLIGHTTEXT01, RGB24);
-		htextcol10 = alloccolor(CLHIGHLIGHTTEXT10, RGB24);
-		htextcol00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
-		cols[BACK] = alloccolor(CLWINDOW, RGB24);
-		cols[HIGH] = highcol11;
-		cols[BORD] = alloccolor(DGrey60, RGB24);
-		cols[TEXT] = textcol11;
-		cols[HTEXT] = htextcol11;
-	}
 	w = emalloc(sizeof(Window));
 	w->screenr = i->r;
 	r = insetrect(i->r, Selborder+1);

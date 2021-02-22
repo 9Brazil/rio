@@ -78,23 +78,27 @@ enum
 
 #define CLBACKGROUND		DTeal
 #define CLWINDOW		DBlack
+/* text color */
 #define CLWINDOWTEXT11		DWhite
 #define CLWINDOWTEXT01		DWhite
 #define CLWINDOWTEXT10		DSilver
 #define CLWINDOWTEXT00		DSilver
+/* highlight background color */
 #define CLHIGHLIGHT11		DNavy
 #define CLHIGHLIGHT01		DDodgerblue
 #define CLHIGHLIGHT10		DNavajowhite
 #define CLHIGHLIGHT00		DSilver
+/* highlighted text color */
 #define CLHIGHLIGHTTEXT11	DWhite
 #define CLHIGHLIGHTTEXT01	DWhite
 #define CLHIGHLIGHTTEXT10	DPinetree
 #define CLHIGHLIGHTTEXT00	DPinetree
+/* border color */
+#define CLACTIONBORDER		DPurered
 #define CLBORDER11		DMedblue
 #define CLBORDER01		DPalegreyblue
 #define CLBORDER10		DGreygreen
 #define CLBORDER00		DPalegreygreen
-#define CLACTIONBORDER		DPurered
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
 
@@ -358,8 +362,25 @@ Cursor			sightcursor;
 Cursor			whitearrow;
 Cursor			query;
 Cursor			*corners[9];
+Image			*cols[NCOL];
 Image			*background;
+Image			*textcol00;
+Image			*textcol01;
+Image			*textcol10;
+Image			*textcol11;
+Image			*htextcol00;
+Image			*htextcol01;
+Image			*htextcol10;
+Image			*htextcol11;
+Image			*highcol00;
+Image			*highcol01;
+Image			*highcol10;
+Image			*highcol11;
 Image			*actioncol;
+Image			*bordcol00;
+Image			*bordcol01;
+Image			*bordcol10;
+Image			*bordcol11;
 Window			**window;
 Window			*wkeyboard;	/* window of simulated keyboard */
 int			nwindow;
