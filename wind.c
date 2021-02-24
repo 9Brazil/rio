@@ -24,7 +24,6 @@ enum
 
 static int topped;
 static int id;
-
 static Cursor *lastcursor;
 
 Window

@@ -336,7 +336,7 @@ shutdown(void *, char *msg)
 	killprocs();
 	for(i=0; oknotes[i]; i++)
 		if(strncmp(oknotes[i], msg, strlen(oknotes[i])) == 0){
-			lock(&shutdownlk); /* only one can threadexitsall */
+			lock(&shutdownlk);	/* only one can threadexitsall */
 			threadexitsall(msg);
 		}
 	fprint(2, "rio %d: abort: %s\n", getpid(), msg);
