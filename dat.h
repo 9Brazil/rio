@@ -94,7 +94,7 @@ enum
 #define CLHIGHLIGHTTEXT10	DPinetree
 #define CLHIGHLIGHTTEXT00	DPinetree
 /* border color */
-#define CLACTIONBORDER		DPurered
+#define CLSIZEBORDER		DPurered
 #define CLBORDER11		DMedblue
 #define CLBORDER01		DPalegreyblue
 #define CLBORDER10		DGreygreen
@@ -376,7 +376,7 @@ Image			*highcol00;
 Image			*highcol01;
 Image			*highcol10;
 Image			*highcol11;
-Image			*actioncol;
+Image			*sizecol;
 Image			*bordcol00;
 Image			*bordcol01;
 Image			*bordcol10;

@@ -812,7 +812,7 @@ Image
 				if(i == nil)
 					goto Rescue;
 				oi = i;
-				border(i, r, Selborder, actioncol, ZP);
+				border(i, r, Selborder, sizecol, ZP);
 				flushimage(display, TRUE);
 			}
 		}
@@ -826,7 +826,7 @@ Image
 	freeimage(oi);
 	if(i == nil)
 		goto Rescue;
-	border(i, r, Selborder, actioncol, ZP);
+	border(i, r, Selborder, sizecol, ZP);
 	cornercursor(input, mouse->xy, TRUE);
 	goto Return;
 
@@ -1024,7 +1024,7 @@ Image
 	i = allocwindow(wscreen, or, Refbackup, CLWINDOW);
 	if(i == nil)
 		return nil;
-	border(i, r, Selborder, actioncol, ZP);
+	border(i, r, Selborder, sizecol, ZP);
 	return i;
 }
 

@@ -541,7 +541,7 @@ void
 iconinit(void)
 {
 	background = alloccolor(CLBACKGROUND, RGB24);
-	actioncol = alloccolor(CLACTIONBORDER, RGB24);
+	sizecol = alloccolor(CLSIZEBORDER, RGB24);
 	bordcol11 = alloccolor(CLBORDER11, RGB24);
 	bordcol01 = alloccolor(CLBORDER01, RGB24);
 	bordcol10 = alloccolor(CLBORDER10, RGB24);
