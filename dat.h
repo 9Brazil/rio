@@ -95,10 +95,10 @@ enum
 #define CLHIGHLIGHTTEXT00	DPinetree
 /* border color */
 #define CLSIZEBORDER		DPurered
-#define CLBORDER11		DMedblue
-#define CLBORDER01		DPalegreyblue
-#define CLBORDER10		DGreygreen
-#define CLBORDER00		DPalegreygreen
+#define CLBORDER11		DNavy
+#define CLBORDER01		DDodgerblue
+#define CLBORDER10		DNavajowhite
+#define CLBORDER00		DSilver
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
 
