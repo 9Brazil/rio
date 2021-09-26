@@ -12,15 +12,6 @@
 #include "err.h"
 #include "fns.h"
 
-/*
- *	WASHINGTON (AP) - The Food and Drug Administration warned
- * consumers Wednesday not to use ``Rio'' hair relaxer products
- * because they may cause severe hair loss or turn hair green....
- *	The FDA urged consumers who have experienced problems with Rio
- * to notify their local FDA office, local health department or the
- * company at 1‑800‑543‑3002.
- */
-
 void		resize(void);
 void		move(void);
 void		delete(void);
@@ -119,7 +110,7 @@ usage(void)
 void
 threadmain(int argc, char *argv[])
 {
-	char *initstr, *kbdin, *s;
+	char *initstr, *kbdin;
 	char buf[256];
 	Image *i;
 	Rectangle r;
@@ -130,7 +121,6 @@ threadmain(int argc, char *argv[])
 	}
 	initstr = nil;
 	kbdin = nil;
-	maxtab = 0;
 	ARGBEGIN{
 	case 'f':
 		fontname = ARGF();
@@ -159,22 +149,7 @@ threadmain(int argc, char *argv[])
 		startdir = estrdup(".");
 	else
 		startdir = estrdup(buf);
-	if(fontname == nil)
-		fontname = getenv("font");
-	if(fontname == nil)
-		fontname = DEFAULTFONT;
-	s = getenv("tabstop");
-	if(s != nil)
-		maxtab = strtol(s, nil, 0);
-	if(maxtab == 0)
-		maxtab = 4;
-	free(s);
-	/* check font before barging ahead */
-	if(access(fontname, AEXIST) < 0){
-		fprint(2, "rio: can't access font %s: %r\n", fontname);
-		exits("font open");
-	}
-	putenv("font", fontname);
+	setfont();
 
 	snarffd = open("/dev/snarf", OREAD|OCEXEC);
 
@@ -280,6 +255,31 @@ getsnarf(void)
 		cvttorunes(sn, i, snarf, &nb, &nsnarf, &nulls);
 		free(sn);
 	}
+}
+
+void
+setfont(void)
+{
+	char *s;
+
+	maxtab = 0;
+
+	if(fontname == nil)
+		fontname = getenv("font");
+	if(fontname == nil)
+		fontname = DEFAULTFONT;
+	s = getenv("tabstop");
+	if(s != nil)
+		maxtab = strtol(s, nil, 0);
+	if(maxtab == 0)
+		maxtab = 4;
+	free(s);
+	/* check font before barging ahead */
+	if(access(fontname, AEXIST) < 0){
+		fprint(2, "rio: can't access font %s: %r\n", fontname);
+		exits("font open");
+	}
+	putenv("font", fontname);
 }
 
 void

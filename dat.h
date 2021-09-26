@@ -198,10 +198,6 @@ struct Window
 	char		name[32];
 	uint		namecount;
 	Rectangle	scrollr;
-	/*
-	 * Rio once used originwindow, so screenr could be different from i->r.
-	 * Now they're always the same but the code doesn't assume so.
-	*/
 	Rectangle	screenr;	/* screen coordinates of window */
 	int		resized;
 	int		wctlready;
