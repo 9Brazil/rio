@@ -851,7 +851,7 @@ drawedge(Image **bp, Rectangle r)
 		originwindow(b, r.min, r.min);
 	else{
 		freeimage(b);
-		*bp = allocwindow(wscreen, r, Refbackup, DRed);
+		*bp = allocwindow(wscreen, r, Refbackup, CLSIZEBORDER);
 	}
 }
 
