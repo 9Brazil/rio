@@ -86,7 +86,9 @@ enum
 	DTeal		= 0x008080FF,
 };
 
+/* rio background */
 #define CLBACKGROUND		DTeal
+/* window background */
 #define CLWINDOW		DBlack
 /* text color */
 #define CLWINDOWTEXT11		DWhite
