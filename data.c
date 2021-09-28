@@ -560,7 +560,7 @@ iconinit(void)
 	htextcol00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
 	cols[BACK] = alloccolor(CLWINDOW, RGB24);
 	cols[HIGH] = highcol11;
-	cols[BORD] = alloccolor(DGrey60, RGB24);
+	cols[BORD] = alloccolor(CLSCROLLBAR, RGB24);
 	cols[TEXT] = textcol11;
 	cols[HTEXT] = htextcol11;
 }

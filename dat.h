@@ -111,9 +111,10 @@ enum
 #define CLBORDER01		DDodgerblue
 #define CLBORDER10		DNavajowhite
 #define CLBORDER00		DSilver
+/* scrollbar color */
+#define CLSCROLLBAR		DGrey60
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
-
 #define DEFAULTSHELL	"/bin/rc"
 
 #define BIG		3		/* factor by which window dimension can exceed screen */
