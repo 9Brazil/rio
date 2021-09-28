@@ -591,14 +591,14 @@ wkeyctl(Window *w, Rune r)
 		case Kend:
 			wshow(w, w->nr);
 			return;
-		case 0x01:	/* ^A: beginning of line */
+		case Ksoh:	/* ^A: beginning of line */
 			if(w->q0==0 || w->q0==w->qh || w->r[w->q0-1]=='\n')
 				return;
-			nb = wbswidth(w, 0x15 /* ^U */);
+			nb = wbswidth(w, Knack /* ^U */);
 			wsetselect(w, w->q0-nb, w->q0-nb);
 			wshow(w, w->q0);
 			return;
-		case 0x05:	/* ^E: end of line */
+		case Kenq:	/* ^E: end of line */
 			q0 = w->q0;
 			while(q0 < w->nr && w->r[q0]!='\n')
 				q0++;
@@ -610,28 +610,28 @@ wkeyctl(Window *w, Rune r)
 		waddraw(w, &r, 1);
 		return;
 	}
-	if(r==0x1B || (w->holding && r==0x7F)){ /* toggle hold */
+	if(r==Kesc || (w->holding && r==Kdel)){ /* toggle hold */
 		if(w->holding)
 			--w->holding;
 		else
 			w->holding++;
 		wrepaint(w);
-		if(r == 0x1B)
+		if(r == Kesc)
 			return;
 	}
-	if(r != 0x7F){
+	if(r != Kdel){
 		wsnarf(w);
 		wcut(w);
 	}
 	switch(r){
-	case 0x7F:	/* send interrupt */
+	case Kdel:	/* send interrupt */
 		w->qh = w->nr;
 		wshow(w, w->qh);
 		notefd = emalloc(sizeof(int));
 		*notefd = w->notefd;
 		proccreate(interruptproc, notefd, 4096);
 		return;
-	case 0x06:	/* ^F: file name completion */
+	case Kack:	/* ^F: file name completion */
 	case Kins:	/* Insert: file name completion */
 		rp = namecomplete(w);
 		if(rp == nil)
@@ -642,9 +642,9 @@ wkeyctl(Window *w, Rune r)
 		wshow(w, q0+nr);
 		free(rp);
 		return;
-	case 0x08:	/* ^H: erase character */
-	case 0x15:	/* ^U: erase line */
-	case 0x17:	/* ^W: erase word */
+	case Kbs:	/* ^H: erase character */
+	case Knack:	/* ^U: erase line */
+	case Ketb:	/* ^W: erase word */
 		if(w->q0==0 || w->q0==w->qh)
 			return;
 		nb = wbswidth(w, r);
@@ -712,7 +712,7 @@ wbswidth(Window *w, Rune c)
 	int skipping;
 
 	/* there is known to be at least one character to erase */
-	if(c == 0x08)	/* ^H: erase character */
+	if(c == Kbs)	/* ^H: erase character */
 		return 1;
 	q = w->q0;
 	stop = 0;
@@ -726,7 +726,7 @@ wbswidth(Window *w, Rune c)
 				--q;
 			break;
 		}
-		if(c == 0x17){
+		if(c == Ketb){
 			eq = isalnum(r);
 			if(eq && skipping)	/* found one; stop skipping */
 				skipping = FALSE;
