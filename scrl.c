@@ -22,7 +22,7 @@ scrtemps(void)
 	if(scrtmp != nil)
 		return;
 	h = BIG*Dy(screen->r);
-	scrtmp = allocimage(display, Rect(0, 0, 32, h), screen->chan, FALSE, DWhite);
+	scrtmp = allocimage(display, Rect(0, 0, 32, h), screen->chan, FALSE, DNofill);
 	if(scrtmp == nil)
 		error(Escrtemps);
 }

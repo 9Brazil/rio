@@ -93,7 +93,7 @@ enum
 #define CLWINDOWTEXT01		DWhite
 #define CLWINDOWTEXT10		DSilver
 #define CLWINDOWTEXT00		DSilver
-/* highlight background color */
+/* highlight color */
 #define CLHIGHLIGHT11		DNavy
 #define CLHIGHLIGHT01		DDodgerblue
 #define CLHIGHLIGHT10		DNavajowhite
