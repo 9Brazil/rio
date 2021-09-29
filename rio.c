@@ -89,7 +89,7 @@ Menu menu3 =
 	menu3str
 };
 
-char *shargv[]  = { "rc", "-i", nil };
+char *rcargv[]  = { "rc", "-i", nil };
 char *kbdargv[] = { "rc", "-c", nil, nil };
 
 int errorshouldabort = FALSE;
@@ -110,7 +110,7 @@ usage(void)
 void
 threadmain(int argc, char *argv[])
 {
-	char *initstr, *kbdin;
+	char *initstr, *kbdin, *s;
 	char buf[256];
 	Image *i;
 	Rectangle r;
@@ -121,6 +121,7 @@ threadmain(int argc, char *argv[])
 	}
 	initstr = nil;
 	kbdin = nil;
+	maxtab = 0;
 	ARGBEGIN{
 	case 'f':
 		fontname = ARGF();
@@ -149,7 +150,22 @@ threadmain(int argc, char *argv[])
 		startdir = estrdup(".");
 	else
 		startdir = estrdup(buf);
-	setfont();
+	if(fontname == nil)
+		fontname = getenv("font");
+	if(fontname == nil)
+		fontname = DEFAULTFONT;
+	s = getenv("tabstop");
+	if(s != nil)
+		maxtab = strtol(s, nil, 0);
+	if(maxtab == 0)
+		maxtab = 4;
+	free(s);
+	/* check font before barging ahead */
+	if(access(fontname, AEXIST) < 0){
+		fprint(2, "rio: can't access %s: %r\n", fontname);
+		exits("font open");
+	}
+	putenv("font", fontname);
 
 	snarffd = open("/dev/snarf", OREAD|OCEXEC);
 
@@ -157,7 +173,6 @@ threadmain(int argc, char *argv[])
 		fprint(2, "rio: can't open display: %r\n");
 		exits("display open");
 	}
-	setshell();
 	iconinit();
 	view = screen;
 	viewr = view->r;
@@ -197,7 +212,7 @@ threadmain(int argc, char *argv[])
 			r.max.x = r.min.x+300;
 			r.max.y = r.min.y+80;
 			i = allocwindow(wscreen, r, Refbackup, CLWINDOW);
-			wkeyboard = new(i, FALSE, scrolling, 0, nil, shell, kbdargv);
+			wkeyboard = new(i, FALSE, scrolling, 0, nil, "/bin/rc", kbdargv);
 			if(wkeyboard == nil)
 				error(Ewkbd);
 		}
@@ -258,62 +273,13 @@ getsnarf(void)
 }
 
 void
-setfont(void)
-{
-	char *s;
-
-	maxtab = 0;
-
-	if(fontname == nil)
-		fontname = getenv("font");
-	if(fontname == nil)
-		fontname = DEFAULTFONT;
-	s = getenv("tabstop");
-	if(s != nil)
-		maxtab = strtol(s, nil, 0);
-	if(maxtab == 0)
-		maxtab = 4;
-	free(s);
-	/* check font before barging ahead */
-	if(access(fontname, AEXIST) < 0){
-		fprint(2, "rio: can't access font %s: %r\n", fontname);
-		exits("font open");
-	}
-	putenv("font", fontname);
-}
-
-void
-setshell(void)
-{
-	int i, l;
-
-	shell = getenv("shell");
-	if(shell == nil)
-		shell = DEFAULTSHELL;
-	if(access(shell, AEXEC) < 0){
-		fprint(2, "rio: can't access shell %s: %r\n", shell);
-		exits("shell");
-	}
-	putenv("shell", shell);
-
-	for(i = strlen(shell)-1; i >= 0; i--)
-		if(shell[i] == '/')
-			break;
-	l = strlen(shell)-i-1;
-	shellname = (char *)malloc(sizeof(char)*l);
-	strcpy(shellname, shell+i+1);
-	shargv[0] = shellname;
-	kbdargv[0] = shellname;
-}
-
-void
 initcmd(void *arg)
 {
 	char *cmd;
 
 	cmd = arg;
 	rfork(RFENVG|RFFDG|RFNOTEG|RFNAMEG);
-	procexecl(nil, shell, shellname, "-c", cmd, nil);
+	procexecl(nil, "/bin/rc", "rc", "-c", cmd, nil);
 	fprint(2, "rio: exec failed: %r\n");
 	exits("exec");
 }
@@ -1194,7 +1160,7 @@ Window
 		arg[1] = cpid;
 		arg[2] = cmd;
 		if(argv == nil)
-			arg[3] = shargv;
+			arg[3] = rcargv;
 		else
 			arg[3] = argv;
 		arg[4] = dir;

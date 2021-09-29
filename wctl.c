@@ -318,7 +318,7 @@ wctlnew(Rectangle rect, char *arg, int pid, int hideit, int scrollit, char *dir,
 		return -1;
 	}
 	argv = emalloc(4*sizeof(char *));
-	argv[0] = shellname;
+	argv[0] = "rc";
 	argv[1] = "-c";
 	while(isspace(*arg))
 		arg++;
@@ -339,7 +339,7 @@ wctlnew(Rectangle rect, char *arg, int pid, int hideit, int scrollit, char *dir,
 	}
 	border(i, rect, Selborder, sizecol, ZP);
 
-	new(i, hideit, scrollit, pid, dir, shell, argv);
+	new(i, hideit, scrollit, pid, dir, "/bin/rc", argv);
 
 	free(argv);	/* when new() returns, argv and args have been copied */
 	return 1;

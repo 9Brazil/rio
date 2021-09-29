@@ -115,7 +115,6 @@ enum
 #define CLSCROLLBAR		DGrey60
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
-#define DEFAULTSHELL	"/bin/rc"
 
 #define BIG		3		/* factor by which window dimension can exceed screen */
 
@@ -419,5 +418,3 @@ int			menuing;	/* menu action is pending; waiting for window to be indicated */
 int			snarfversion;	/* updated each time it is written */
 int			messagesize;	/* negotiated in 9P version setup */
 int			debug;
-char			*shell;
-char			*shellname;
