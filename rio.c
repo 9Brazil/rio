@@ -652,7 +652,7 @@ button3menu(void)
 	case -1:
 		break;
 	case New:
-		new(sweep(), FALSE, scrolling, 0, nil, shell, nil);
+		new(sweep(), FALSE, scrolling, 0, nil, "/bin/rc", nil);
 		break;
 	case Reshape:
 		resize();
