@@ -1311,7 +1311,7 @@ wsetpid(Window *w, int pid, int dolabel)
 
 	w->pid = pid;
 	if(dolabel){
-		sprint(buf, "%s %d", shellname, pid);
+		sprint(buf, "%s %d", "rc", pid);
 		free(w->label);
 		w->label = estrdup(buf);
 	}

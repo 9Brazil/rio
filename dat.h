@@ -54,7 +54,6 @@ typedef struct Timer		Timer;
 typedef struct Wctlmesg		Wctlmesg;
 typedef struct Window		Window;
 typedef struct Xfid		Xfid;
-typedef enum Mesgtype		Mesgtype;
 
 enum
 {
@@ -122,6 +121,7 @@ enum
 #define WIN(q)		((((ulong)(q).path)>>8) & 0xFFFFFF)
 #define FILE(q)		(((ulong)(q).path) & 0xFF)
 
+typedef
 enum Mesgtype				/* control messages */
 {
 	Wakeup,
@@ -135,7 +135,7 @@ enum Mesgtype				/* control messages */
 	Holdoff,
 	Deleted,
 	Exited,
-};
+} Mesgtype;
 
 struct Wctlmesg
 {
