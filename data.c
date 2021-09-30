@@ -558,9 +558,10 @@ iconinit(void)
 	htextcol01 = alloccolor(CLHIGHLIGHTTEXT01, RGB24);
 	htextcol10 = alloccolor(CLHIGHLIGHTTEXT10, RGB24);
 	htextcol00 = alloccolor(CLHIGHLIGHTTEXT00, RGB24);
+	sldrcol = alloccolor(CLSCRLBRSLDR, RGB24);
+	cols[BORD] = alloccolor(CLSCRLBRTRCK, RGB24);
 	cols[BACK] = alloccolor(CLWINDOW, RGB24);
-	cols[HIGH] = highcol11;
-	cols[BORD] = alloccolor(CLSCROLLBAR, RGB24);
 	cols[TEXT] = textcol11;
+	cols[HIGH] = highcol11;
 	cols[HTEXT] = htextcol11;
 }

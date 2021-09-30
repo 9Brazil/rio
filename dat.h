@@ -110,8 +110,9 @@ enum
 #define CLBORDER01		DDodgerblue
 #define CLBORDER10		DNavajowhite
 #define CLBORDER00		DSilver
-/* scrollbar color */
-#define CLSCROLLBAR		DGrey60
+/* scrollbar colors */
+#define CLSCRLBRTRCK		DGrey60		/* scrollbar track */
+#define	CLSCRLBRSLDR		DBlack		/* scrollbar slider */
 
 #define DEFAULTFONT	"/lib/font/bit/lucm/unicode.9.font"
 
@@ -393,6 +394,7 @@ Image			*bordcol00;
 Image			*bordcol01;
 Image			*bordcol10;
 Image			*bordcol11;
+Image			*sldrcol;
 Window			**window;
 Window			*wkeyboard;	/* window of simulated keyboard */
 int			nwindow;
