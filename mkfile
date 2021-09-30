@@ -14,8 +14,8 @@ OFILES=\
 	xfid.$O\
 
 HFILES=dat.h\
-	err.h\
 	fns.h\
+	err.h\
 
 UPDATE=\
 	mkfile\
