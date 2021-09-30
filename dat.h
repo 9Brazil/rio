@@ -57,6 +57,12 @@ typedef struct Xfid		Xfid;
 
 enum
 {
+	TRUE		= 1,
+	FALSE		= 0,
+};
+
+enum
+{
 	Selborder	= 4,		/* border of selected window */
 	Unselborder	= 1,		/* border of unselected window */
 };
@@ -65,12 +71,6 @@ enum
 {
 	Scrollwid	= 12,		/* width of scroll bar */
 	Scrollgap	= 4,		/* gap right of scroll bar */
-};
-
-enum
-{
-	TRUE		= 1,
-	FALSE		= 0,
 };
 
 enum
@@ -85,9 +85,9 @@ enum
 	DTeal		= 0x008080FF,
 };
 
-/* rio background */
+/* rio background color */
 #define CLBACKGROUND		DTeal
-/* window background */
+/* window background color */
 #define CLWINDOW		DBlack
 /* text color */
 #define CLWINDOWTEXT11		DWhite
