@@ -10,8 +10,8 @@
 #include <plumb.h>
 #include <complete.h>
 #include "dat.h"
-#include "err.h"
 #include "fns.h"
+#include "err.h"
 
 #define MOVEIT if(0)
 

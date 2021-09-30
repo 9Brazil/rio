@@ -9,9 +9,9 @@
 #include <fcall.h>
 #include <plumb.h>
 #include "dat.h"
-#include "err.h"
 #include "fns.h"
 #include <ctype.h>
+#include "err.h"
 
 /* >= Top are disallowed if mouse button is pressed */
 enum

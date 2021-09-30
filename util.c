@@ -8,8 +8,8 @@
 #include <frame.h>
 #include <fcall.h>
 #include "dat.h"
-#include "err.h"
 #include "fns.h"
+#include "err.h"
 
 void
 cvttorunes(char *p, int n, Rune *r, int *nb, int *nr, int *nulls)

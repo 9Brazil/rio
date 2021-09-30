@@ -8,8 +8,8 @@
 #include <frame.h>
 #include <fcall.h>
 #include "dat.h"
-#include "err.h"
 #include "fns.h"
+#include "err.h"
 
 static Channel	*ctimer; /* chan(Timer *)[100] */
 static Timer	*timer;

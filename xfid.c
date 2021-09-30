@@ -9,8 +9,8 @@
 #include <fcall.h>
 #include <plumb.h>
 #include "dat.h"
-#include "err.h"
 #include "fns.h"
+#include "err.h"
 
 static Xfid	*xfidfree;
 static Xfid	*xfid;

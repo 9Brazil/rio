@@ -9,8 +9,17 @@
 #include <fcall.h>
 #include <plumb.h>
 #include "dat.h"
-#include "err.h"
 #include "fns.h"
+#include "err.h"
+
+/*
+ *  WASHINGTON (AP) - The Food and Drug Administration warned
+ * consumers Wednesday not to use ``Rio'' hair relaxer products
+ * because they may cause severe hair loss or turn hair green....
+ *    The FDA urged consumers who have experienced problems with Rio
+ * to notify their local FDA office, local health department or the
+ * company at 1‑800‑543‑3002.
+ */
 
 void		resize(void);
 void		move(void);
