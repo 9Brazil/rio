@@ -165,10 +165,8 @@ xfidattach(Xfid *x)
 			err = Ebadrect;
 		else{
 			if(hideit)
-				//i = allocimage(display, r, screen->chan, 0, DWhite);
-				i = allocimage(display, r, screen->chan, 0, DNofill);
+				i = allocimage(display, r, screen->chan, FALSE, DNofill);
 			else
-				//i = allocwindow(wscreen, r, Refbackup, DWhite);
 				i = allocwindow(wscreen, r, Refbackup, DNofill);
 			if(i != nil){
 				border(i, r, Selborder, display->black, ZP);
