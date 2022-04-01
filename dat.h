@@ -85,7 +85,7 @@ enum
 	DTeal		= 0x008080FF,
 };
 
-/* rio background color */
+/* rio background default color */
 #define CLBACKGROUND		DTeal
 /* window background color */
 #define CLWINDOW		DBlack
