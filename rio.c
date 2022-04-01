@@ -152,6 +152,9 @@ threadmain(int argc, char *argv[])
 	case 's':
 		scrolling = TRUE;
 		break;
+	case 'D':
+		debug++;
+		break;
 	}ARGEND
 
 	mainpid = getpid();
